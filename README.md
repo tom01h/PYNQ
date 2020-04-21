@@ -4,14 +4,15 @@
 
 ```
 PYNQは、ザイリンクスプラットフォームの使用を容易にするザイリンクスのオープンソースプロジェクトです。
-設計者は、Python言語とライブラリを使用して、プログラマブルロジックとマイクロプロセッサの利点を活用し、より機能的で刺激的な電子システムを構築できます。
+設計者は、Python言語とライブラリを使用して、プログラマブルロジックとマイクロプロセッサの利点を活用し、
+より機能的で刺激的な電子システムを構築できます。
 ```
 
 つまり、Python から PL を簡単に制御するための仕組みってことかな。
 
 Zynq の場合は PS 上で Linux と Python が動きます (Alveo は知らない)。
 
-## セットアップとサンプルを実行
+## セットアップとサンプルの実行
 
 ### ダウンロードと SD カードへの書き込み
 
@@ -64,7 +65,7 @@ resize2fs でパーティションの拡張をする必要はないみたいで�
 
 まずは `base/board/board_btns_leds.ipynb` を開いてみます。出来ることは上のほうに書いてある通り。
 
-`In[1]` も近くをクリックして、青の枠で囲まれている状態で、上にある Run ボタンを押します。
+`In[1]` の近くをクリックして、青の枠で囲まれている状態で、上にある Run ボタンを押します。
 
 しばらくすると、ボード上の Done LED が一瞬消えて、LED0-3 が点灯します。
 
@@ -80,38 +81,98 @@ BTN0-3 を押すと、上のほうに書いてある通りの動作をします�
 
 ## PYNQ Workshop を試す
 
-<!--[PYNQ_Workshop](https://github.com/Xilinx/PYNQ_Workshop) をいくつか試してみます。-->
+[PYNQ_Workshop](https://github.com/Xilinx/PYNQ_Workshop) をいくつか試してみます。
 
-### <!--ファイル転送-->
+### ファイル転送 (参考)
 
-<!--エクスプローラーのアドレスバー(？) に `\\192.168.0.106\xilinx` を入力するとファイルのアクセスができます。-->
+エクスプローラーのアドレスバー(？) に先ほど調べたアドレスを参考に `\\192.168.0.106\xilinx` を入力するとファイルのアクセスができます。
 
-<!--先の github からダウンロードしてきたファイルを転送します。-->
+### ダウンロード
 
-### <!--サンプルを実行する-->
+FPGA 上で jupyter_notebooks/ ディレクトリに github からダウンロードする。
 
-#### <!--mmio-->
+```
+xilinx@pynq:~$ cd jupyter_notebooks/
+xilinx@pynq:~/jupyter_notebooks$ git clone https://github.com/Xilinx/PYNQ_Workshop
+Cloning into 'PYNQ_Workshop'...
+略
+```
 
-<!--Session_4/3_mmio.ipynb-->
+### サンプルを実行する
 
-#### <!--Memory Allocation-->
+[Petalinux と DMA を使うサンプル実装](https://github.com/tom01h/TIL/tree/master/petalinux_dma) の時と比較しながら実行していきます。
 
-<!--Session_4/4_basic_xlnk_example.ipynb-->
+再度 Jupyter Notebook を開いて、
 
-#### <!--DMA tutorial-->
+#### mmio
 
-<!--Session_4/6_dma_tutorial.ipynb-->
+最初に `PYNQ_Workshop/Session_4/3_mmio.ipynb` を試します。
 
-#### <!--今はやらないけど MicroBlaze program-->
+PL GPIO を読み書きするサンプル。
 
-<!--MicroBlaze のプログラムを送り込んで実行することもできそう-->
+uio を使ってやっていたことを、MMIO class を使ってやるような感じだと思います。
 
-<!--Session_4/5_xlnk_with_pl_master_example.ipynb-->
+IP のインスタンス名からアドレスを調べて、そのアドレスの GPIO レジスタの値を読み書きできます。
+
+read() に引数ないけど、デフォルト 0 なんでしょうね。
+
+引数を 4 にしたら、書いたはずの ffffffff の実際にレジスタが存在する下位数ビット以外は0として読みだせました。
+
+#### Memory Allocation
+
+つぎは `PYNQ_Workshop/Session_4/4_basic_xlnk_example.ipynb` を試します。
+
+udmabuf 相当のものと思われます。
+
+ここではバッファを確保して、そのアドレスを調べているだけです。
+
+#### DMA tutorial
+
+つぎは `PYNQ_Workshop/Session_4/6_dma_tutorial.ipynb` を試します。
+
+PL DMA を使って、DRAM から FIFO(BRAM) への転送と、 FIFO(BRAM) から DRAM へのデータ転送をします。
+
+FIFO の入出力は AXI STREAM です。
+
+とりあえず実行してそのあとに…
+
+out_buffer のアドレスを調べる (ノートブック上で)
+
+```
+print(hex(output_buffer.physical_address))
+0x1804a000
+```
+
+devmem2 でメモリの内容を調べる (コマンドライン上で)
+
+```
+$ sudo apt install devmem2
+$ sudo devmem2 0x1804a000
+略
+Value at address 0x1804A000 (0xb6f90000): 0xCAFE0000
+$ sudo devmem2 0x1804a008
+略
+Value at address 0x1804A008 (0xb6fa0008): 0xCAFE0002
+```
+
+まぁ、思った通りに動いていそうです。
+
+ただ、AXI DMA はリードとライトで別々にインスタンスする必要があるのかな？
+
+#### MicroBlaze program (今はやらないけど)
+
+MicroBlaze のプログラムを送り込んで実行することもできるみたいです。
+
+`PYNQ_Workshop/Session_4/5_xlnk_with_pl_master_example.ipynb`
 
 ## PL デザインを自作する
+
+<!--[Petalinux と DMA を使うサンプル実装](https://github.com/tom01h/TIL/tree/master/petalinux_dma) の時と同じことを試していきます。-->
 
 <!--PL 上の BRAM に DMA を使ってアクセスする-->
 
 <!--PL 上の 行列乗算器(1)を使う-->
 
 <!--PL 上の 行列乗算器(4)を使う-->
+
+## <!--ゼロから作る Deep Lerning 7章-->
