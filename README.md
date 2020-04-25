@@ -12,6 +12,8 @@ PYNQは、ザイリンクスプラットフォームの使用を容易にする�
 
 Zynq の場合は PS 上で Linux と Python が動きます (Alveo は知らない)。
 
+Arty Z7 20 と PYNQ Z1 は電源スイッチの有無以外に差はないらしく、Arty Z7 20 でも PYNQ が実行できるとのことです。
+
 ## セットアップとサンプルの実行
 
 ### ダウンロードと SD カードへの書き込み
@@ -61,6 +63,8 @@ resize2fs でパーティションの拡張をする必要はないみたいで�
 
 アドレスバーに先ほど調べたアドレスを参考に `http://192.168.0.106:9090/` を入力します。
 
+ソースコードを見るだけなら、PYNQ をインストールしなくても [ここ(board)](https://github.com/Xilinx/PYNQ/tree/master/boards/Pynq-Z1/base/notebooks/board) か [ここ(common)](https://github.com/Xilinx/PYNQ/tree/master/pynq/notebooks/common) から見れます。
+
 #### btns_leds
 
 まずは `base/board/board_btns_leds.ipynb` を開いてみます。出来ることは上のほうに書いてある通り。
@@ -82,10 +86,6 @@ BTN0-3 を押すと、上のほうに書いてある通りの動作をします�
 ## PYNQ Workshop を試す
 
 [PYNQ_Workshop](https://github.com/Xilinx/PYNQ_Workshop) をいくつか試してみます。
-
-### ファイル転送 (参考)
-
-エクスプローラーのアドレスバー(？) に先ほど調べたアドレスを参考に `\\192.168.0.106\xilinx` を入力するとファイルのアクセスができます。
 
 ### ダウンロード
 
@@ -167,12 +167,30 @@ MicroBlaze のプログラムを送り込んで実行することもできるみ
 
 ## PL デザインを自作する
 
-<!--[Petalinux と DMA を使うサンプル実装](https://github.com/tom01h/TIL/tree/master/petalinux_dma) の時と同じことを試していきます。-->
+[Petalinux と DMA を使うサンプル実装](https://github.com/tom01h/TIL/tree/master/petalinux_dma) の時と同じことを試していきます。
 
-<!--PL 上の BRAM に DMA を使ってアクセスする-->
+ただし、AXI DMA はリードとライトで別々にインスタンスしたほうが面倒に巻き込まれないで済みそうです。
+
+あと、PYNQ v2.5 を使用するには、Vivado 2019.1 を使うのが良いと思います。
+
+以降、Jupyter Notebook は使いません。
+
+### ファイル転送 (参考)
+
+エクスプローラーのアドレスバー(？) に先ほど調べたアドレスを参考に `\\192.168.0.106\xilinx` を入力するとファイルのアクセスができます。
+
+### 1 PL 上の BRAM に DMA を使ってアクセスする
+
+PL に作った BRAM  に DMA を使ってアクセスします。
+
+先の DMA tutorial とあまり変わりませんが、メモリマップアクセスと、DMA と使ったストリームアクセスのどちらでもアクセスできるメモリを作成して使用しています。
+
+詳細は、`PYNQ/ArtyZ7/1_dma` を参照ください。
 
 <!--PL 上の 行列乗算器(1)を使う-->
 
 <!--PL 上の 行列乗算器(4)を使う-->
 
 ## <!--ゼロから作る Deep Lerning 7章-->
+
+<!--[Ultra96 でやってみた人](https://www8281uo.sakura.ne.jp/blog/?p=739)-->
