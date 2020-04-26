@@ -45,9 +45,9 @@ IP の行列乗算機能は疑似コードを書くとこんな感じ。
 
 #### 手動でやるなら
 
-1. Vivado でソースファイル （```top.v, buf.sv, control.sv, core.sv, ex_ctl.sv, loop_lib.sv``` ）を開く
-2. ブロックデザインの中に ```top``` を RTLモジュールとして追加する
-3. ほかの部品を ```design_1.pdf``` を参考に追加して結線する
+1. Vivado でソースファイル （`top.v, buf.sv, control.sv, core.sv, ex_ctl.sv, loop_lib.sv` ）を開く
+2. ブロックデザインの中に `top` を RTLモジュールとして追加する
+3. ほかの部品を `design_1.pdf` を参考に追加して結線する
 4. PL のクロックは 100MHz
 
 ### ファイルを転送する
