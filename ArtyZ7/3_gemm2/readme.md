@@ -50,6 +50,10 @@ IP の行列乗算機能は前回と同じです。
 
 ### ファイルを転送する
 
+FPGA の Linux にlib ディレクトリを作成し、../lib から以下のファイルをコピーする
+
+- fpga.py
+
 FPGA の Linux に 3_gemm2 ディレクトリを作成し、以下のファイルをコピーする
 
 - test.py
@@ -71,6 +75,6 @@ FPGA の Linux に 3_gemm2/bit ディレクトリを作成し、以下のファ�
 先ほど作成した 3_gemm2ディレクトリにて、
 
 ```
-xilinx@pynq:~/3_gemm2$ sudo python3 test.py
+xilinx@pynq:~/3_gemm2$ sudo PYTHONPATH=~ python3 test.py
 ```
 

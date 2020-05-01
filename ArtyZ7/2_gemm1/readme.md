@@ -52,6 +52,10 @@ IP の行列乗算機能は疑似コードを書くとこんな感じ。
 
 ### ファイルを転送する
 
+FPGA の Linux にlib ディレクトリを作成し、../lib から以下のファイルをコピーする
+
+- fpga.py
+
 FPGA の Linux に 2_gemm1 ディレクトリを作成し、以下のファイルをコピーする
 
 - test.py
@@ -73,7 +77,7 @@ FPGA の Linux に 2_gemm1/bit ディレクトリを作成し、以下のファ�
 先ほど作成した 2_gemm1 ディレクトリにて、
 
 ```
-xilinx@pynq:~/2_gemm1$ sudo python3 test.py
+xilinx@pynq:~/2_gemm1$ sudo PYTHONPATH=~ python3 test.py
 ```
 
 ### TODO
@@ -83,10 +87,10 @@ PL to PS の DMA が 1回の転送が終わると、Running が False になっ�
 今は無理やり DMA リセットをしているが正しくはどうすべきなんだろうか？
 
 ```
-    # DAM Reset & Restart
     dma0.write(0x00,4)
-    dma1.write(0x30,4)
     dma_send.sendchannel.start()
+
+    dma1.write(0x30,4)
     dma_recv.recvchannel.start()
 ```
 
