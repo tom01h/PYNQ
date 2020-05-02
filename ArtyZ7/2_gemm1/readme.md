@@ -34,7 +34,28 @@ IP の行列乗算機能は疑似コードを書くとこんな感じ。
 データの入出力には Xilinx の AXI DMA IP を使います。  
 行列乗算モジュールの実装はかなりいい加減なので流用することはあまり考えないでください。
 
-## <!--RTL シミュレーションを実行する-->
+## RTL シミュレーションを実行する
+
+ホストマシン側の準備として、numpy をインストールします。
+
+```
+$ sudo apt install python3-pip
+$ pip3 install numpy
+```
+
+RTL から Python モジュールをコンパイルします。
+
+コンパイルには Python3 と Verilator が必要です。
+
+```
+$ make
+```
+
+シミュレーションを実行すると、波形ファイル `tmp.vcd` ができます。
+
+```
+$ PYTHONPATH=../../ python3 test.py
+```
 
 ## FPGA で実行する
 

@@ -1,12 +1,6 @@
 from pynq import Overlay
 from pynq import MMIO
-from pynq import allocate
 import pynq.lib.dma
-
-import numpy as np
-
-def alloc(shape, dtype):
-    return allocate(shape, dtype)
 
 class _Fpga(object):
     def __init__(self, bit_file = "./bit/gemm1.bit"):
@@ -34,14 +28,17 @@ class _Fpga(object):
         self._dma0.write(0x00,4)
         self._dma_send.sendchannel.start()
         self._dma_send.sendchannel.transfer(data)
+
+    def send_wait(self):
         self._dma_send.sendchannel.wait()
 
-    def recv_reset(self):
+    def recv(self, data):
         self._dma1.write(0x30,4)
         self._dma_recv.recvchannel.start()
-
-    def recv_transfer(self, data):
         self._dma_recv.recvchannel.transfer(data)
 
     def recv_wait(self):
         pass # TODO
+
+    def fin(self):
+        pass

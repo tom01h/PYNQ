@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from lib.fpga import _Fpga
-from lib.fpga import alloc
+from lib.lib  import alloc
 
 print("Load bit-file")
 

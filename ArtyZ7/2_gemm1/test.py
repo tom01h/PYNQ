@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from lib.fpga import _Fpga
-from lib.fpga import alloc
+from lib.lib  import alloc
 
 print("Load bit-file")
 
@@ -17,6 +17,7 @@ print(matrix)
 
 fpga.write(0, 1)
 fpga.send(matrix)
+fpga.send_wait()
 fpga.write(0, 0)
 
 #run
@@ -32,9 +33,9 @@ for n in range(2):
             in_data[j][i] = random.randrange(255)
     print(in_data)
 
-    fpga.recv_reset()
+    fpga.recv(out_data)
     fpga.send(in_data)
-    fpga.recv_transfer(out_data)
+    fpga.send_wait()
     fpga.recv_wait()
 
     print("--- Sample", n, "Output ---")
@@ -51,3 +52,4 @@ for n in range(2):
 
 fpga.write(0, 0)
 del matrix, in_data, out_data
+fpga.fin()
