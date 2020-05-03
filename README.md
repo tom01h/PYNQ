@@ -205,6 +205,12 @@ IP の行列乗算機能は前回と同じです。
 
 詳細は、`PYNQ/ArtyZ7/3_gemm2` を参照ください。
 
-## <!--ゼロから作る Deep Lerning 7章-->
+## ゼロから作る Deep Lerning 7章
+
+書籍『[ゼロから作る Deep Learning](http://www.oreilly.co.jp/books/9784873117584/)』のソースコードを、[ここ](https://github.com/oreilly-japan/deep-learning-from-scratch) からコピーして使用します。
+
+`deep-learning-from-scratch/{README.md, LICENSE.md}` を確認の上で使用してください。
+
+ここでの使い方は、`deep-learning-from-scratch/ch07/README.md` を参照ください。
 
 <!--[Ultra96 でやってみた人](https://www8281uo.sakura.ne.jp/blog/?p=739)-->
