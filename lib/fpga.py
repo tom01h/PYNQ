@@ -4,10 +4,13 @@ import top as top
 class _Fpga(object):
     def __init__(self, bit_file):
         self._send_data = {}
+        self._bus_size = top.bus_size()
 
     def _evaluate(self):
         if len(self._send_data) > 0:
-            send_data = self._send_data.pop(0)
+            send_data = 0
+            for i in range(self._bus_size):
+                send_data += self._send_data.pop(0)<<(32*i)
             top.send(send_data)
         self._recv_list = {}
         top.evaluate()
@@ -37,8 +40,10 @@ class _Fpga(object):
         while i < len(data_flat):
             recv_data = top.recv()
             if not recv_data == None:
-                data_flat[i] = recv_data
-                i += 1
+                for j in range(self._bus_size):
+                    data_flat[i] = recv_data%(1<<32)
+                    recv_data >>= 32
+                    i += 1
             self._evaluate()
         top.recv_fin()
         self._evaluate()

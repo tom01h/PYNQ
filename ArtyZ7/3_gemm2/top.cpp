@@ -37,7 +37,7 @@ void eval()
 static PyObject *
 bus_size (PyObject *self, PyObject *args) {
 
-  return Py_BuildValue("i", 1);
+  return Py_BuildValue("i", 2);
 }
 
 static PyObject *
@@ -50,9 +50,9 @@ fin (PyObject *self, PyObject *args) {
 
 static PyObject *
 write (PyObject *self, PyObject *args) {
-  int address, data;
+  long address, data;
   // 送られてきた値をパース
-  if(!PyArg_ParseTuple(args, "ii",&address, &data))
+  if(!PyArg_ParseTuple(args, "ll",&address, &data))
     return NULL;
 
   verilator_top->S_AXI_AWADDR = address;
@@ -77,9 +77,9 @@ evaluate (PyObject *self, PyObject *args) {
 
 static PyObject *
 send (PyObject *self, PyObject *args) {
-  int data;
+  long data;
   // 送られてきた値をパース
-  if(!PyArg_ParseTuple(args, "i", &data))
+  if(!PyArg_ParseTuple(args, "l", &data))
     return NULL;
 
   verilator_top->S_AXIS_TDATA = data;
@@ -106,7 +106,7 @@ send_fin (PyObject *self, PyObject *args) {
 static PyObject *
 recv (PyObject *self, PyObject *args) {
   if(verilator_top->M_AXIS_TVALID){
-    return Py_BuildValue("i", verilator_top->M_AXIS_TDATA);
+    return Py_BuildValue("l", verilator_top->M_AXIS_TDATA);
   }else{
     return Py_None;
   }

@@ -18,6 +18,7 @@ print(matrix.transpose(2,0,1)[0])
 
 fpga.write(0, 1)
 fpga.send(matrix)
+fpga.send_wait()
 fpga.write(0, 0)
 
 #run
@@ -34,6 +35,7 @@ for j in range(4):
 print(in_data)
 
 fpga.send(in_data)
+fpga.send_wait()
 
 result=[0]*4*4
 
@@ -49,8 +51,7 @@ for n in range(3):
                     print("(Error Expecetd =", i, result[j][i], ") ")
 
     # DAM recv
-    fpga.recv_reset()
-    fpga.recv_transfer(out_data)
+    fpga.recv(out_data)
 
     if n+1 != 3:
         for j in range(4):
@@ -69,10 +70,12 @@ for n in range(3):
         print(in_data)
 
         fpga.send(in_data)
+        fpga.send_wait()
 
     else:
         fpga.write(0, 6)
 
+fpga.recv_wait()
 print("--- Sample", 2, "Output ---")
 for j in range(4):
     sum=[0]*4
@@ -87,3 +90,5 @@ for j in range(4):
             print("(Error Expecetd =", i, result[j][i], ") ")
 
 fpga.write(0, 0)
+del matrix, in_data, out_data
+fpga.fin()
