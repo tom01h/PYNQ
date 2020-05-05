@@ -39,7 +39,7 @@ module ex_ctl
 
    dff #(.W(1)) d_k_fin (.in(last_ic), .data(k_fin), .clk(clk), .rst(rst), .en(1'b1));
    dff #(.W(1)) d_k_init0 (.in(next_dc&!s_init), .data(k_init0), .clk(clk),
-                           .rst(rst), .en(!out_busy|next_ic));
+                           .rst(rst), .en(!out_busy|next_dc));
 
 // dc loop end
 
