@@ -13,7 +13,8 @@ $ pip3 install matplotlib
 実行は↓。画面にグラフが出る代わりに、`figure.png` が保存されます。
 
 ```
-$ python3 train_convnet.py
+$ make
+$ PYTHONPATH=../../ python3 test.py
 ```
 
 とりあえず、Convolution forward だけ、`simple_convnet.py` の構成固定で RTL 化ができました。
