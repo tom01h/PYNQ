@@ -14,7 +14,7 @@ $ pip3 install matplotlib
 
 ```
 $ make
-$ PYTHONPATH=../../ python3 test.py
+$ PYTHONPATH=../ python3 train_convnet.py
 ```
 
 とりあえず、Convolution forward だけ、`simple_convnet.py` の構成固定で RTL 化ができました。
