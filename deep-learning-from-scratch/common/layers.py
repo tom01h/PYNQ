@@ -3,6 +3,10 @@ import numpy as np
 from common.functions import *
 from common.util import im2col, col2im
 
+from lib.fpga import _Fpga
+from lib.lib  import alloc
+from lib.fpga import float_to_hex
+from lib.fpga import int_to_float
 
 class Relu:
     def __init__(self):
@@ -196,7 +200,7 @@ class BatchNormalization:
 
 
 class Convolution:
-    def __init__(self, W, b, stride=1, pad=0):
+    def __init__(self, W, b, stride=1, pad=0, fpga=None):
         self.W = W
         self.b = b
         self.stride = stride
@@ -211,6 +215,12 @@ class Convolution:
         self.dW = None
         self.db = None
 
+        self.init_f = True
+        self.init_b = True
+        self.init_p = True
+
+        self._fpga = fpga
+
     def forward(self, x):
         FN, C, FH, FW = self.W.shape
         N, C, H, W = x.shape
@@ -221,12 +231,74 @@ class Convolution:
         col_W = self.W.reshape(FN, -1).T
 
         out = np.dot(col, col_W) + self.b
-        out = out.reshape(N, out_h, out_w, -1).transpose(0, 3, 1, 2)
+        if self.init_f:
+            print("Conv forward Weight", col_W.shape)
+            print("Conv forward In Data", col.shape)
+            print("Conv forward Out Data", out.shape)
+            print("")
+            self.init_f = False
+
+        # set matrix
+        self._fpga.write(0, 1)
+        self._fpga.send(col_W)
+        self._fpga.send_wait()
+        self._fpga.write(0, 0)
+
+        # run
+        out_data = alloc(shape=(40,30), dtype=np.uint32)
+        self._fpga.write(0, 2)
+
+        # 0 input
+        self._fpga.send(col[0:40])
+        self._fpga.send_wait()
+
+        loop_num = int(col.shape[0]/40)
+        for n in range(loop_num):
+            if n != 0:
+                # n-1 output
+                self._fpga.recv_wait()
+
+                for i in range(40):
+                    for j in range(30):
+                        fl = int_to_float(out_data[i][j]) + self.b[j]
+                        ou = out[i+(n-1)*40][j]
+                        if (fl - ou) == 0 or ou == 0 and fl == 0:
+                            pass
+                        elif abs((fl - ou)/ou) < 0.01:
+                            pass
+                        else:
+                            print("Error: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
+                        out[i+(n-1)*40][j] = fl
+
+            self._fpga.recv(out_data)
+
+            # n+1 input
+            if n+1 != loop_num:
+                self._fpga.send(col[(n+1)*40:(n+2)*40])
+                self._fpga.send_wait()
+            else:
+                self._fpga.write(0, 6)
+
+        # loop_num-1 output
+        self._fpga.recv_wait()
+
+        for i in range(40):
+            for j in range(30):
+                fl = int_to_float(out_data[i][j]) + self.b[j]
+                ou = out[i+(loop_num-1)*40][j]
+                if (fl - ou) == 0 or ou == 0 and fl == 0:
+                    pass
+                elif abs((fl - ou)/ou) < 0.01:
+                    pass
+                else:
+                    print("Error: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
+                out[i+(loop_num-1)*40][j] = fl
 
         self.x = x
         self.col = col
         self.col_W = col_W
 
+        out = out.reshape(N, out_h, out_w, -1).transpose(0, 3, 1, 2)
         return out
 
     def backward(self, dout):
@@ -235,9 +307,19 @@ class Convolution:
 
         self.db = np.sum(dout, axis=0)
         self.dW = np.dot(self.col.T, dout)
-        self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
-
         dcol = np.dot(dout, self.col_W.T)
+
+        if self.init_b:
+            print("Conv backward Out Data", dout.shape)
+            print("Conv backward In Data", self.col.T.shape)
+            print("Conv backward delta W", self.dW.shape)
+            print("")
+            print("Conv backward Weight", self.col_W.T.shape)
+            print("Conv backward Out Data", dout.shape)
+            print("Conv backward delta In", dcol.shape)
+            self.init_b = False
+
+        self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
         dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
 
         return dx

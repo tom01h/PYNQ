@@ -25,7 +25,7 @@ class SimpleConvNet:
     """
     def __init__(self, input_dim=(1, 28, 28), 
                  conv_param={'filter_num':30, 'filter_size':5, 'pad':0, 'stride':1},
-                 hidden_size=100, output_size=10, weight_init_std=0.01):
+                 hidden_size=100, output_size=10, weight_init_std=0.01, fpga=None):
         filter_num = conv_param['filter_num']
         filter_size = conv_param['filter_size']
         filter_pad = conv_param['pad']
@@ -49,7 +49,7 @@ class SimpleConvNet:
         # レイヤの生成
         self.layers = OrderedDict()
         self.layers['Conv1'] = Convolution(self.params['W1'], self.params['b1'],
-                                           conv_param['stride'], conv_param['pad'])
+                                           conv_param['stride'], conv_param['pad'], fpga)
         self.layers['Relu1'] = Relu()
         self.layers['Pool1'] = Pooling(pool_h=2, pool_w=2, stride=2)
         self.layers['Affine1'] = Affine(self.params['W2'], self.params['b2'])
