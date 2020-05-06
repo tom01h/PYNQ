@@ -18,6 +18,8 @@ module batch_ctrl
    output wire [8:0]  src_a,
    output wire [31:0] prm_v,
    output reg [4:0]   prm_a,
+   output wire        prm_i,
+   output reg         prm_0,
    output wire        dst_v,
    output wire [8:0]  dst_a,
    output reg         execp,
@@ -105,19 +107,26 @@ module batch_ctrl
 ////////////////////// prm_v, prm_a /////////////////////////////
 
    reg [3:0]         prm_sel;
+   reg               prm_inv;
 
-   assign prm_v = (~src_valid|~matw) ? 32'h0 : 3<<(prm_sel*2);
+   assign prm_v = (~src_valid|~matw) ? 32'h0 : 3<<(prm_sel*2+prm_inv);
+   assign prm_i = ~prm_inv & matw & src_valid;
 
    always_ff @(posedge clk)begin
       if(reset|~matw)begin
          prm_sel <= 4'h0;
          prm_a <= 5'h0;
+         prm_inv <= 1'b0;
+         prm_0 <= 1'b0;
       end else if(src_valid)begin
-         if(prm_sel != (out_ch/2))begin
+         if((prm_sel + prm_inv) != (out_ch/2))begin
             prm_sel <= prm_sel + 1;
+            prm_0 <= 1'b0;
          end else begin
             prm_sel <= 4'h0;
             prm_a <= prm_a + 1;
+            prm_inv <= ~prm_inv&~out_ch[0];
+            prm_0 <= ~prm_inv&~out_ch[0];
          end
       end
    end

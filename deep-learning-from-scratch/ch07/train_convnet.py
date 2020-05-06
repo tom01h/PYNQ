@@ -49,3 +49,5 @@ plt.ylim(0, 1.0)
 plt.legend(loc='lower right')
 # save as png
 plt.savefig('figure.png')
+
+fpga.fin()

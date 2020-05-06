@@ -3,6 +3,7 @@ module core
    input wire        clk,
    input wire        init,
    input wire        write,
+   input wire        write0,
    input wire        exec,
    input wire        outr,
    input wire        update,
@@ -10,6 +11,7 @@ module core
    input wire [4:0]  wa,
    input wire [31:0] d,
    input wire [64:0] wd,
+   input wire [31:0] wd_l,
    input wire        ws,
    input wire [31:0] acc_in,
    output reg [31:0] acc
@@ -23,7 +25,9 @@ module core
    assign acc  = (update) ? accl  : acct;
 
    always_ff @(posedge clk)begin
-      if(write)begin
+      if(write0)begin
+         matrix[wa] <= wd_l[31:0];
+      end else if(write)begin
          if(ws)begin
             matrix[wa] <= wd[63:32];
          end else begin

@@ -73,6 +73,8 @@ module top
    wire [8:0]        src_a;
    wire [31:0]       prm_v;
    wire [4:0]        prm_a;
+   wire              prm_i;
+   wire              prm_0;
    wire              dst_v;
    wire [8:0]        dst_a;
 
@@ -116,6 +118,8 @@ module top
       .src_a(src_a[8:0]),
       .prm_v(prm_v[31:0]),
       .prm_a(prm_a[4:0]),
+      .prm_i(prm_i),
+      .prm_0(prm_0),
       .dst_v(dst_v),
       .dst_a(dst_a[8:0]),
       .execp(execp),
@@ -181,6 +185,14 @@ module top
       .result(result)
       );
 
+
+   reg [31:0]        wd_l;
+   always @(posedge AXIS_ACLK)begin
+      if(prm_i)begin
+         wd_l <= S_AXIS_TDATA[63:32];
+      end
+   end
+
    generate
       genvar         i;
       for (i = 0; i < 32; i = i + 1) begin
@@ -189,6 +201,7 @@ module top
                 .clk(AXIS_ACLK),
                 .init(k_init),
                 .write(prm_v[i]),
+                .write0(prm_0&(i==0)),
                 .exec(exec),
                 .outr(outr),
                 .update(sum_update),
@@ -196,7 +209,8 @@ module top
                 .wa(prm_a[4:0]),
                 .d(d),
                 .wd(S_AXIS_TDATA[63:0]),
-                .ws(i%2),
+                .wd_l(wd_l),
+                .ws(i[0]^(~prm_i)),
                 .acc_in(acc[i+1]),
                 .acc(acc[i])
                 );

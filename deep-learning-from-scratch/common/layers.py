@@ -239,7 +239,7 @@ class Convolution:
             self.init_f = False
 
         sample = 30
-        kernel = FH*FW
+        kernel = C*FH*FW
         out_ch = FN
         self._fpga.write(int('0x04', 16), int(sample-1))
         self._fpga.write(int('0x08', 16), int(out_ch-1))
@@ -254,7 +254,7 @@ class Convolution:
         self._fpga.write(0, 0)
 
         # run
-        out_data = alloc(shape=(sample,30), dtype=np.uint32)
+        out_data = alloc(shape=(sample,out_ch), dtype=np.uint32)
         self._fpga.write(0, 2)
 
         # 0 input
@@ -268,7 +268,7 @@ class Convolution:
                 self._fpga.recv_wait()
 
                 for i in range(sample):
-                    for j in range(30):
+                    for j in range(out_ch):
                         fl = int_to_float(out_data[i][j]) + self.b[j]
                         ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
@@ -292,7 +292,7 @@ class Convolution:
         self._fpga.recv_wait()
 
         for i in range(sample):
-            for j in range(30):
+            for j in range(out_ch):
                 fl = int_to_float(out_data[i][j]) + self.b[j]
                 ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
@@ -326,7 +326,73 @@ class Convolution:
             print("Conv backward Weight", self.col_W.T.shape)
             print("Conv backward Out Data", dout.shape)
             print("Conv backward delta In", dcol.shape)
+            print("")
             self.init_b = False
+
+        sample = 30
+        kernel = FN
+        out_ch = C*FH*FW
+        self._fpga.write(int('0x04', 16), int(sample-1))
+        self._fpga.write(int('0x08', 16), int(out_ch-1))
+        self._fpga.write(int('0x0c', 16), int(kernel-1))
+        self._fpga.write(int('0x10', 16), int(kernel*sample/2-1))
+        self._fpga.write(int('0x14', 16), int(out_ch*sample/2-1))
+
+        # set matrix
+        self._fpga.write(0, 1)
+        self._fpga.send(self.col_W.T)
+        self._fpga.send_wait()
+        self._fpga.write(0, 0)
+
+        # run
+        out_data = alloc(shape=(sample,out_ch), dtype=np.uint32)
+        self._fpga.write(0, 2)
+
+        # 0 input
+        self._fpga.send(dout[0:sample])
+        self._fpga.send_wait()
+
+        loop_num = int(dout.shape[0]/sample)
+        for n in range(loop_num):
+            if n != 0:
+                # n-1 output
+                self._fpga.recv_wait()
+
+                for i in range(sample):
+                    for j in range(out_ch):
+                        fl = int_to_float(out_data[i][j])
+                        dc = dcol[i+(n-1)*sample][j]
+                        if (fl - dc) == 0 or dc == 0 and fl == 0:
+                            pass
+                        elif abs((fl - dc)/dc) < 0.01:
+                            pass
+                        else:
+                            print("Error: ", n-1,i,j,abs((fl - dc)/dc),fl,dc)
+                        dcol[i+(n-1)*sample][j] = fl
+
+            self._fpga.recv(out_data)
+
+            # n+1 input
+            if n+1 != loop_num:
+                self._fpga.send(dout[(n+1)*sample:(n+2)*sample])
+                self._fpga.send_wait()
+            else:
+                self._fpga.write(0, 6)
+
+        # loop_num-1 output
+        self._fpga.recv_wait()
+
+        for i in range(sample):
+            for j in range(out_ch):
+                fl = int_to_float(out_data[i][j])
+                dc = dcol[i+(loop_num-1)*sample][j]
+                if (fl - dc) == 0 or dc == 0 and fl == 0:
+                    pass
+                elif abs((fl - dc)/dc) < 0.01:
+                    pass
+                else:
+                    print("Error: ", loop_num-1,i,j,abs((fl - dc)/dc),fl,dc)
+                dcol[i+(loop_num-1)*sample][j] = fl
 
         self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
         dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)

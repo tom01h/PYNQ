@@ -63,7 +63,3 @@ class _Fpga(object):
 
     def fin(self):
         top.fin()
-
-
-
-
