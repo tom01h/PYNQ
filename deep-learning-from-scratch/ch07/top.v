@@ -4,7 +4,11 @@
 *                                     [1] run  data input/ matrix mul/ *
 *                                              data output             *
 *                                     [2] last last cycle              *
-* reg  0x010            32bit         control dummy register           *
+* reg  0x004            32bit         sample num -1                    *
+* reg  0x008            32bit         out channel -1                   *
+* reg  0x00c            32bit         kernel -1                        *
+* reg  0x010            32bit         in size / 2 -1                   *
+* reg  0x014            32bit         out size / 2 -1                  *
 \**********************************************************************/
 module top
   (
@@ -57,6 +61,11 @@ module top
    assign M_AXIS_TLAST = 1'b0;
 
    reg               run, matw, last;
+   reg [4:0]         sample;
+   reg [4:0]         out_ch;
+   reg [4:0]         kernel;
+   reg [8:0]         src_a_max;
+   reg [8:0]         dst_a_max;
 
    wire              s_init;
 
@@ -65,12 +74,12 @@ module top
    wire [31:0]       prm_v;
    wire [4:0]        prm_a;
    wire              dst_v;
-   wire [9:0]        dst_a;
+   wire [8:0]        dst_a;
 
    wire              out_busy;
    wire              outr;
    wire              outrf;
-   wire [10:0]       oa;
+   wire [9:0]        oa;
    wire              sum_update;
 
    wire [31:0]       d;
@@ -91,6 +100,9 @@ module top
      (
       .clk(AXIS_ACLK),
       .reset(~AXIS_ARESETN),
+      .out_ch(out_ch[4:0]),
+      .src_a_max(src_a_max[8:0]),
+      .dst_a_max(dst_a_max[8:0]),
       .matw(matw),
       .run(run),
       .last(last),
@@ -105,7 +117,7 @@ module top
       .prm_v(prm_v[31:0]),
       .prm_a(prm_a[4:0]),
       .dst_v(dst_v),
-      .dst_a(dst_a[9:0]),
+      .dst_a(dst_a[8:0]),
       .execp(execp),
       .inp(inp),
       .outp(outp)
@@ -115,6 +127,8 @@ module top
      (
       .clk(AXIS_ACLK),
       .rst(~run),
+      .sample(sample[4:0]),
+      .kernel(kernel[4:0]),
       .s_init(s_init),
       .out_busy(out_busy),
       .outrf(outrf),
@@ -130,13 +144,15 @@ module top
      (
       .clk(AXIS_ACLK),
       .rst(~run),
+      .sample(sample[4:0]),
+      .out_ch(out_ch[4:0]),
       .s_init(s_init),
       .out_busy(out_busy),
       .k_init(k_init),
       .k_fin(k_fin),
       .outr(outr),
       .outrf(outrf),
-      .oa(oa[10:0]),
+      .oa(oa[9:0]),
       .update(sum_update)
    );
 
@@ -158,10 +174,10 @@ module top
      (
       .clk(AXIS_ACLK),
       .dst_v(dst_v),
-      .dst_a({outp,dst_a[9:0]}),
+      .dst_a({outp,dst_a[8:0]}),
       .dst_d(M_AXIS_TDATA),
       .outr(outr),
-      .oa({execp,oa[10:0]}),
+      .oa({execp,oa[9:0]}),
       .result(result)
       );
 
@@ -247,8 +263,6 @@ module top
    end
 
 
-   reg [31:0] control;
-
    wire       regwrite = (axist==4'b0011) & (wb_adr_i[11:10]==2'b00);
    wire       regread  = (axist==4'b0100) & (rd_adr_i[11:10]==2'b00);
 
@@ -257,11 +271,15 @@ module top
    always @(posedge S_AXI_ACLK)begin
       if(~S_AXI_ARESETN)begin
          {last, run, matw} <= 3'b000;
-         control <= 32'h0;
+         sample <= 6'h0;
       end else if(regwrite)begin
          case({wb_adr_i[9:2],2'b00})
            10'h00: {last, run, matw} <= wb_dat_i[2:0];
-           10'h10: control <= wb_dat_i;
+           10'h04: sample <= wb_dat_i[4:0];
+           10'h08: out_ch <= wb_dat_i[4:0];
+           10'h0c: kernel <= wb_dat_i[4:0];
+           10'h10: src_a_max <= wb_dat_i[8:0];
+           10'h14: dst_a_max <= wb_dat_i[8:0];
          endcase
       end
    end
@@ -273,7 +291,11 @@ module top
          S_AXI_RDATA <= 0;
          case({rd_adr_i[9:2],2'b00})
            10'h00: S_AXI_RDATA[2:0] <= {last, run, matw};
-           10'h10: S_AXI_RDATA <= control;
+           10'h04: S_AXI_RDATA[4:0] <= sample;
+           10'h08: S_AXI_RDATA[4:0] <= out_ch;
+           10'h0c: S_AXI_RDATA[4:0] <= kernel;
+           10'h10: S_AXI_RDATA[8:0] <= src_a_max;
+           10'h14: S_AXI_RDATA[8:0] <= dst_a_max;
          endcase
       end
    end

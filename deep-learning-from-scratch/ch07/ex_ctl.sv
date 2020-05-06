@@ -2,6 +2,8 @@ module ex_ctl
   (
    input wire        clk,
    input wire        rst,
+   input wire [4:0]  sample,
+   input wire [4:0]  kernel,
    input wire        s_init,
    input wire        out_busy,
    input wire        outrf,
@@ -13,16 +15,12 @@ module ex_ctl
    output wire [4:0] wa
    );
    
-   parameter sample = 40-1;
-   parameter ic_max = 25-1;
-
    wire               last_dc, last_ic;
    wire               next_dc, next_ic;
-   wire [4:0]                       ic;
-   wire [5:0]         dc;
+   wire [4:0]         dc,           ic;
 
 
-   loop1 #(.W(6)) l_dc(.ini(6'd0), .fin(sample), .data(dc), .start(s_init),  .last(last_dc),
+   loop1 #(.W(5)) l_dc(.ini(5'd0), .fin(sample), .data(dc), .start(s_init),  .last(last_dc),
                        .clk(clk),  .rst(rst),                .next(next_dc),   .en(last_ic)  );
 
    wire               s_init0, k_init0, start;
@@ -32,10 +30,10 @@ module ex_ctl
    dff #(.W(1)) d_exec   (.in(k_init|exec&!last_ic), .data(exec), .clk(clk), .rst(rst), .en(1'b1));
    dff #(.W(1)) d_start  (.in(k_init), .data(start), .clk(clk), .rst(rst), .en(1'b1));
 
-   loop1 #(.W(5)) l_ic(.ini(5'd0), .fin(ic_max), .data(ic), .start(start),   .last(last_ic),
+   loop1 #(.W(5)) l_ic(.ini(5'd0), .fin(kernel), .data(ic), .start(start),   .last(last_ic),
                        .clk(clk),  .rst(rst),                .next(next_ic),   .en(1'b1)  );
 
-   assign ia = dc*(ic_max+1) + ic;
+   assign ia = dc*(kernel+1) + ic;
    assign wa = ic;
 
 // ic loop end

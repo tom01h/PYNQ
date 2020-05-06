@@ -39,43 +39,43 @@ module dst_buf
   (
    input wire         clk,
    input wire         dst_v,
-   input wire [10:0]  dst_a,
+   input wire [9:0]   dst_a,
    output wire [63:0] dst_d,
    input wire         outr,
-   input wire [11:0]  oa,
+   input wire [10:0]  oa,
    input wire [31:0]  result
    );
 
-   reg [31:0]        buff00 [0:1023];
-   reg [31:0]        buff01 [0:1023];
-   reg [31:0]        buff10 [0:1023];
-   reg [31:0]        buff11 [0:1023];
+   reg [31:0]        buff00 [0:511];
+   reg [31:0]        buff01 [0:511];
+   reg [31:0]        buff10 [0:511];
+   reg [31:0]        buff11 [0:511];
 
    reg [63:0]        dst_d0;
    reg [63:0]        dst_d1;
 
-   assign dst_d = (dst_a[10]) ? dst_d1 : dst_d0;
+   assign dst_d = (dst_a[9]) ? dst_d1 : dst_d0;
 
    always_ff @(posedge clk)
-     if(outr&~oa[0]&~oa[11])
-       buff00[oa[10:1]] <= result;
-     else if(dst_v&~dst_a[10])
-       dst_d0[31:0] <= buff00[dst_a[9:0]];
+     if(outr&~oa[0]&~oa[10])
+       buff00[oa[9:1]] <= result;
+     else if(dst_v&~dst_a[9])
+       dst_d0[31:0] <= buff00[dst_a[8:0]];
    always_ff @(posedge clk)
-     if(outr& oa[0]&~oa[11])
-       buff01[oa[10:1]] <= result;
-     else if(dst_v&~dst_a[10])
-       dst_d0[63:32] <= buff01[dst_a[9:0]];
+     if(outr& oa[0]&~oa[10])
+       buff01[oa[9:1]] <= result;
+     else if(dst_v&~dst_a[9])
+       dst_d0[63:32] <= buff01[dst_a[8:0]];
 
    always_ff @(posedge clk)
-     if(outr&~oa[0]& oa[11])
-       buff10[oa[10:1]] <= result;
-     else if(dst_v& dst_a[10])
-       dst_d1[31:0] <= buff10[dst_a[9:0]];
+     if(outr&~oa[0]& oa[10])
+       buff10[oa[9:1]] <= result;
+     else if(dst_v& dst_a[9])
+       dst_d1[31:0] <= buff10[dst_a[8:0]];
    always_ff @(posedge clk)
-     if(outr& oa[0]& oa[11])
-       buff11[oa[10:1]] <= result;
-     else if(dst_v& dst_a[10])
-       dst_d1[63:32] <= buff11[dst_a[9:0]];
+     if(outr& oa[0]& oa[10])
+       buff11[oa[9:1]] <= result;
+     else if(dst_v& dst_a[9])
+       dst_d1[63:32] <= buff11[dst_a[8:0]];
 
 endmodule

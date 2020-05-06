@@ -2,6 +2,9 @@ module batch_ctrl
   (
    input wire         clk,
    input wire         reset,
+   input wire [4:0]   out_ch,
+   input wire [8:0]   src_a_max,
+   input wire [8:0]   dst_a_max,
    input wire         matw,
    input wire         run,
    input wire         last,
@@ -16,15 +19,11 @@ module batch_ctrl
    output wire [31:0] prm_v,
    output reg [4:0]   prm_a,
    output wire        dst_v,
-   output wire [9:0]  dst_a,
+   output wire [8:0]  dst_a,
    output reg         execp,
    output wire        inp,
    output wire        outp
    );
-
-   parameter prm_sel_max = 30/2 -1;   //oc / 2
-   parameter src_a_max = 25*40/2 -1;  //kernel * sample / 2
-   parameter dst_a_max = 30*40/2 -1;  //oc * sample / 2
 
    assign inp  = ~execp;
    assign outp = ~execp;
@@ -67,7 +66,7 @@ module batch_ctrl
 
    wire              last_da;
    wire              next_da;
-   reg [9:0]         da;
+   reg [8:0]         da;
 
    wire              dstart, dstart0;
    wire              dst_v0;
@@ -78,8 +77,8 @@ module batch_ctrl
 
    assign dstart = den&dstart0;
 
-   loop1 #(.W(10)) l_da(.ini(10'd0), .fin(dst_a_max), .data(da), .start(dstart),  .last(last_da),
-                        .clk(clk),   .rst(~run),                  .next(next_da),   .en(den) );
+   loop1 #(.W(9)) l_da(.ini(9'd0), .fin(dst_a_max), .data(da), .start(dstart),  .last(last_da),
+                       .clk(clk),  .rst(~run),                  .next(next_da),   .en(den) );
 
    assign dst_a = da;
    assign dst_v = dst_v0 & dst_ready;
@@ -114,7 +113,7 @@ module batch_ctrl
          prm_sel <= 4'h0;
          prm_a <= 5'h0;
       end else if(src_valid)begin
-         if(prm_sel != prm_sel_max)begin
+         if(prm_sel != (out_ch/2))begin
             prm_sel <= prm_sel + 1;
          end else begin
             prm_sel <= 4'h0;
@@ -126,29 +125,27 @@ endmodule
 
 module out_ctrl
   (
-   input wire        clk,
-   input wire        rst,
-   input wire        s_init,
-   output reg        out_busy,
-   input wire        k_init,
-   input wire        k_fin,
-   output reg        outr,
-   output reg        outrf,
-   output reg [10:0] oa,
-   output reg        update
+   input wire       clk,
+   input wire       rst,
+   input wire [4:0] sample,
+   input wire [4:0] out_ch,
+   input wire       s_init,
+   output reg       out_busy,
+   input wire       k_init,
+   input wire       k_fin,
+   output reg       outr,
+   output reg       outrf,
+   output reg [9:0] oa,
+   output reg       update
    );
-
-   parameter sample = 40-1;
-   parameter ct_max = 30-1;
 
    reg               out_busy1;
    reg               outr00;
-   reg [10:0]        oa0;
+   reg [9:0]         oa0;
 
    wire              last_wi, last_ct;
    wire              next_wi, next_ct;
-   wire [5:0]        wi;
-   wire [4:0]                 ct;
+   wire [4:0]        wi,      ct;
    reg               last_wi0, last_ct0;
    reg               outr0;
    reg               update0;
@@ -179,10 +176,10 @@ module out_ctrl
       end
    end
 
-   loop1 #(.W(6)) l_wi(.ini(6'd0), .fin(sample), .data(wi), .start(s_init),  .last(last_wi),
+   loop1 #(.W(5)) l_wi(.ini(5'd0), .fin(sample), .data(wi), .start(s_init),  .last(last_wi),
                        .clk(clk),  .rst(rst),                .next(next_wi),   .en(last_ct)  );
 
-   loop1 #(.W(5)) l_ct(.ini(5'd0), .fin(ct_max), .data(ct), .start(start),   .last(last_ct),
+   loop1 #(.W(5)) l_ct(.ini(5'd0), .fin(out_ch), .data(ct), .start(start),   .last(last_ct),
                        .clk(clk),  .rst(rst),                .next(next_ct),   .en(1'b1)  );
 
    always_ff @(posedge clk)begin
@@ -193,7 +190,7 @@ module out_ctrl
          last_ct0 <= 1'b0;
          last_wi0 <= 1'b0;
       end else begin
-         oa <= oa0;         oa0 <= wi*(ct_max+1) + ct;
+         oa <= oa0;         oa0 <= wi*(out_ch+1) + ct;
          outr <= outr0;     outr0 <= outr00|start;
          outrf <= last_wi0;
          update <= update0; update0 <= start;

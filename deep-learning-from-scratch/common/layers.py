@@ -238,6 +238,15 @@ class Convolution:
             print("")
             self.init_f = False
 
+        sample = 30
+        kernel = FH*FW
+        out_ch = FN
+        self._fpga.write(int('0x04', 16), int(sample-1))
+        self._fpga.write(int('0x08', 16), int(out_ch-1))
+        self._fpga.write(int('0x0c', 16), int(kernel-1))
+        self._fpga.write(int('0x10', 16), int(kernel*sample/2-1))
+        self._fpga.write(int('0x14', 16), int(out_ch*sample/2-1))
+
         # set matrix
         self._fpga.write(0, 1)
         self._fpga.send(col_W)
@@ -245,36 +254,36 @@ class Convolution:
         self._fpga.write(0, 0)
 
         # run
-        out_data = alloc(shape=(40,30), dtype=np.uint32)
+        out_data = alloc(shape=(sample,30), dtype=np.uint32)
         self._fpga.write(0, 2)
 
         # 0 input
-        self._fpga.send(col[0:40])
+        self._fpga.send(col[0:sample])
         self._fpga.send_wait()
 
-        loop_num = int(col.shape[0]/40)
+        loop_num = int(col.shape[0]/sample)
         for n in range(loop_num):
             if n != 0:
                 # n-1 output
                 self._fpga.recv_wait()
 
-                for i in range(40):
+                for i in range(sample):
                     for j in range(30):
                         fl = int_to_float(out_data[i][j]) + self.b[j]
-                        ou = out[i+(n-1)*40][j]
+                        ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
                             pass
                         elif abs((fl - ou)/ou) < 0.01:
                             pass
                         else:
                             print("Error: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
-                        out[i+(n-1)*40][j] = fl
+                        out[i+(n-1)*sample][j] = fl
 
             self._fpga.recv(out_data)
 
             # n+1 input
             if n+1 != loop_num:
-                self._fpga.send(col[(n+1)*40:(n+2)*40])
+                self._fpga.send(col[(n+1)*sample:(n+2)*sample])
                 self._fpga.send_wait()
             else:
                 self._fpga.write(0, 6)
@@ -282,17 +291,17 @@ class Convolution:
         # loop_num-1 output
         self._fpga.recv_wait()
 
-        for i in range(40):
+        for i in range(sample):
             for j in range(30):
                 fl = int_to_float(out_data[i][j]) + self.b[j]
-                ou = out[i+(loop_num-1)*40][j]
+                ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
                     pass
                 elif abs((fl - ou)/ou) < 0.01:
                     pass
                 else:
                     print("Error: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
-                out[i+(loop_num-1)*40][j] = fl
+                out[i+(loop_num-1)*sample][j] = fl
 
         self.x = x
         self.col = col
