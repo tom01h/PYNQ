@@ -18,10 +18,10 @@ VERILATOR_OPTS = \
 VERILATOR_MAKE_OPTS = OPT_FAST="-O3"
 
 DESIGN_SRCS = \
-top.v \
-buf.sv \
+top_bf16.v \
+buf_bf16.sv \
 control.sv \
-core.sv \
+core_bf16.sv \
 ex_ctl.sv \
 loop_lib.sv \
 

@@ -155,7 +155,8 @@ module out_ctrl
    wire              last_wi, last_ct;
    wire              next_wi, next_ct;
    wire [4:0]        wi,      ct;
-   reg               last_wi0, last_ct0;
+   reg                        last_ct0;
+   reg               last_wi4, last_wi5;
    reg               outr0;
    reg               update0;
 
@@ -197,14 +198,16 @@ module out_ctrl
          outr <= 1'b0;      outr0 <= 1'b0;
          update <= 1'b0;    update0 <= 1'b0;
          last_ct0 <= 1'b0;
-         last_wi0 <= 1'b0;
+         last_wi4 <= 1'b0;
+         last_wi5 <= 1'b0;
       end else begin
          oa <= oa0;         oa0 <= wi*(out_ch+1) + ct;
          outr <= outr0;     outr0 <= outr00|start;
-         outrf <= last_wi0;
+         outrf <= last_wi5;
          update <= update0; update0 <= start;
          last_ct0 <= last_ct;
-         last_wi0 <= last_wi;
+         last_wi4 <= last_wi;
+         last_wi5 <= last_wi4;
       end
    end
 endmodule
