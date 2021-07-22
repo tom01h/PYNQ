@@ -21,7 +21,7 @@ DMA は Xilinx の AXI DMA IP を使います。
 2. ブロックデザインの中に ```mem``` を RTLモジュールとして追加する
 3. ほかの部品を ```design_1.pdf``` を参考に追加して結線する
 4. PL のクロックは 100MHz
-5. **PS の HP0 のバス幅を 128bit に設定しないと正しく動きません**
+5. **PS の HPC0 のバス幅を 128bit に設定しないと正しく動きません**
 
 ### ファイルを転送する
 
@@ -31,15 +31,15 @@ FPGA の Linux に 1_dma ディレクトリを作成し、以下のファイル�
 
 FPGA の Linux に 1_dma/bit ディレクトリを作成し、以下のファイルをリネームしてコピーする
 
-`PYNQ\ArtyZ7\1_dma\project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+`PYNQ/Ultra96/1_dma/sensors96b/sensors96b.srcs/sources_1/bd/sensors96b/hw_handoff/` から
 
-- design_1.hwh を dma.hwh にリネームしてコピー
+- sensors96b.hwh を dma.hwh にリネームしてコピー
 
-- design_1_bd.tcl を dma.tcl にリネームしてコピー
+- sensors96b_bd.tcl を dma.tcl にリネームしてコピー
 
-`PYNQ\ArtyZ7\1_dma\project_1\project_1.runs\impl_1` から
+`PYNQ/Ultra96/1_dma/sensors96b/sensors96b.runs/impl_1/` から
 
-- design_1_wrapper.bit を dma.bit にリネームしてコピー
+- sensors96b_wrapper.bit を dma.bit にリネームしてコピー
 
 ### 実行する
 
