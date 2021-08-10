@@ -18,9 +18,9 @@ Arty Z7 20 と PYNQ Z1 は電源スイッチの有無以外に差はないらし
 
 ### ダウンロードと SD カードへの書き込み
 
-[公式ダウンロードページ](http://www.pynq.io/board.html) から `PYNQ-Z1 v2.5 PYNQ image` をダウンロード。
+[公式ダウンロードページ](http://www.pynq.io/board.html) から `PYNQ-Z1 v2.6 PYNQ image` をダウンロード。
 
-ZIP ファイルから `pynq_z1_v2.5.img` を取り出す。
+ZIP ファイルから `pynq_z1_v2.6.img` を取り出す。
 
 ここから先は RaspberryPi で実行しましたが、dd が使えれば何でもよいはず。
 

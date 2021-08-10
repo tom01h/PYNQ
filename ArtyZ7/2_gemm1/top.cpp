@@ -1,13 +1,16 @@
 #include "sim/Vtop.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
 #include <Python.h>
 
 vluint64_t vcdstart = 0;
 vluint64_t vcdend = vcdstart + 300000;
 vluint64_t main_time;
-VerilatedVcdC* tfp;
 Vtop* verilator_top;
+
+#if TRACE
+#include "verilated_vcd_c.h"
+VerilatedVcdC* tfp;
+#endif
 
 void eval()
 {
@@ -17,8 +20,10 @@ void eval()
 
   verilator_top->eval();
 
+#if TRACE
   if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
     tfp->dump(main_time);
+#endif
   main_time += 5;
 
   // posegedge clk /////////////////////////////
@@ -27,8 +32,10 @@ void eval()
 
   verilator_top->eval();
 
+#if TRACE
   if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
     tfp->dump(main_time);
+#endif
   main_time += 5;
 
   return;
@@ -44,7 +51,9 @@ static PyObject *
 fin (PyObject *self, PyObject *args) {
 
   delete verilator_top;
+#if TRACE
   tfp->close();
+#endif
   return Py_None;
 }
 
@@ -158,11 +167,12 @@ PyMODINIT_FUNC PyInit_top (void) {
   //  Verilated::commandArgs(argc,argv);
   Verilated::traceEverOn(true);
   main_time = 0;
-  tfp = new VerilatedVcdC;
   verilator_top = new Vtop;
+#if TRACE
+  tfp = new VerilatedVcdC;
   verilator_top->trace(tfp, 99); // requires explicit max levels param
   tfp->open("tmp.vcd");
-
+#endif
   main_time = 0;
 
   // initial begin /////////////////////////////

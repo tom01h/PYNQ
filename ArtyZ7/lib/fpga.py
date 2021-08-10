@@ -10,14 +10,6 @@ class _Fpga(object):
         gemm_range = self._overlay.ip_dict['top_0/S_AXI']['addr_range']
         self._gemm = MMIO(gemm_address, gemm_range)
 
-        dma1_address = self._overlay.ip_dict['axi_dma_1']['phys_addr']
-        dma1_range = self._overlay.ip_dict['axi_dma_1']['addr_range']
-        self._dma1 = MMIO(dma1_address, dma1_range)
-
-        dma0_address = self._overlay.ip_dict['axi_dma_0']['phys_addr']
-        dma0_range = self._overlay.ip_dict['axi_dma_0']['addr_range']
-        self._dma0 = MMIO(dma0_address, dma0_range)
-
         self._dma_send = self._overlay.axi_dma_0
         self._dma_recv = self._overlay.axi_dma_1
 
@@ -25,20 +17,16 @@ class _Fpga(object):
         self._gemm.write(address, value)
 
     def send(self, data):
-        self._dma0.write(0x00,4)
-        self._dma_send.sendchannel.start()
         self._dma_send.sendchannel.transfer(data)
 
     def send_wait(self):
         self._dma_send.sendchannel.wait()
 
     def recv(self, data):
-        self._dma1.write(0x30,4)
-        self._dma_recv.recvchannel.start()
         self._dma_recv.recvchannel.transfer(data)
 
     def recv_wait(self):
-        pass # TODO
+        self._dma_recv.recvchannel.wait()
 
     def fin(self):
         pass

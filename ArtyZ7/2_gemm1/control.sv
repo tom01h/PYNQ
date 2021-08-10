@@ -9,6 +9,7 @@ module batch_ctrl
    input wire        src_valid,
    output wire       src_ready,
    output wire       dst_valid,
+   output wire       dst_last,
    input wire        dst_ready,
    output wire       src_v,
    output wire [4:0] src_a,
@@ -41,6 +42,7 @@ module batch_ctrl
    assign dst_a = da;
    assign dst_v = dst_v0 & dst_ready;
    dff #(.W(1)) d_dst_valid (.in(dst_v0), .data(dst_valid), .clk(clk), .rst(~run), .en(den));
+   dff #(.W(1)) d_dst_last  (.in(dst_v0&last_da), .data(dst_last), .clk(clk), .rst(~run), .en(den));
 
 ////////////////////// src_v, src_a /// s_init, src_ready ///////
 

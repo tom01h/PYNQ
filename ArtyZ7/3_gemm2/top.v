@@ -54,7 +54,6 @@ module top
    );
 
    assign M_AXIS_TSTRB = 8'hff;
-   assign M_AXIS_TLAST = 1'b0;
 
    reg               run, matw, last;
 
@@ -100,6 +99,7 @@ module top
       .src_ready(S_AXIS_TREADY),
       .dst_valid(M_AXIS_TVALID),
       .dst_ready(M_AXIS_TREADY),
+      .dst_last(M_AXIS_TLAST),
       .src_v(src_v),
       .src_a(src_a[3:0]),
       .prm_v(prm_v[3:0]),

@@ -40,7 +40,7 @@ module mem
    output reg        M_AXIS_TVALID,
    output reg [31:0] M_AXIS_TDATA,
    output wire [3:0] M_AXIS_TSTRB,
-   output wire       M_AXIS_TLAST,
+   output reg        M_AXIS_TLAST,
    input wire        M_AXIS_TREADY,
 
    ////////////////////////////////////////////////////////////////////////////
@@ -60,9 +60,9 @@ module mem
    wire               s1read0  = s1readr &(st_adr_i!=ssize)&M_AXIS_TREADY;
    wire               s1write0 = s1writer&(st_adr_i!=ssize)&S_AXIS_TVALID;
    reg                s1read1;
+   reg                s1last;
 
    assign S_AXIS_TREADY = s1writer&(st_adr_i!=ssize);
-   assign M_AXIS_TLAST = 1'b0;
    assign M_AXIS_TSTRB = 4'hf;
 
    always @(posedge S_AXI_ACLK)begin
@@ -162,6 +162,9 @@ module mem
    reg [31:0]  mrd1;
 
    always @(posedge S_AXI_ACLK)begin
+      s1last <= s1read0 & (st_adr_i+1==ssize);
+   end
+   always @(posedge S_AXI_ACLK)begin
      if(m1write0|s1write0)
        mem1[wb_adr_p[9:2]] <= wb_dat_p;
      else if(m1read0|s1read0)
@@ -198,6 +201,7 @@ module mem
       end
       if(s1read1&M_AXIS_TREADY)begin
          M_AXIS_TDATA <= mrd1;
+         M_AXIS_TLAST <= s1last;
       end
    end
 endmodule

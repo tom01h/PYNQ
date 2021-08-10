@@ -74,6 +74,7 @@ $ PYTHONPATH=../../ python3 test.py
 FPGA の Linux にlib ディレクトリを作成し、../lib から以下のファイルをコピーする
 
 - fpga.py
+- lib.py
 
 FPGA の Linux に 3_gemm2 ディレクトリを作成し、以下のファイルをコピーする
 
