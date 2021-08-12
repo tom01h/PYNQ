@@ -56,7 +56,13 @@ module dst_buf
    reg               outr4,   outr5;
    reg [10:0]        oa4,     oa5;
    wire [31:0]       nrm;
+   reg               sign4;
+   reg signed [9:0]  exp4;
+   reg signed [31:0] add4;
    always_ff @(posedge clk)begin
+      sign4   <= signo;
+      exp4    <= expo;
+      add4    <= addo;
       outr4   <= outr;
       outr5   <= outr4;
       oa4     <= oa;
@@ -94,9 +100,9 @@ module dst_buf
      (
       .clk(clk),
       .en(outr4),
-      .signo(signo),
-      .expo(expo),
-      .addo(addo),
+      .signo(sign4),
+      .expo(exp4),
+      .addo(add4),
       .nrm(nrm)
    );
 endmodule

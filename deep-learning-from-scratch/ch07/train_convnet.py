@@ -20,7 +20,7 @@ from lib.fpga import _Fpga
 x_train, t_train = x_train[:500], t_train[:500]
 x_test, t_test = x_test[:100], t_test[:100]
 
-max_epochs = 5
+max_epochs = 1
 
 fpga = _Fpga("dummy.bit")
 

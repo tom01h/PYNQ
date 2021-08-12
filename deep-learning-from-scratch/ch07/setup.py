@@ -1,5 +1,9 @@
 from setuptools import setup, Extension
+import glob
+
+filelist  = ['top.cpp', 'verilated.cpp']
+filelist += glob.glob("sim/*.cpp")
 setup(name='top',
         version='1.0',
-        ext_modules=[Extension('top', ['top.cpp', 'sim/Vtop__ALLcls.cpp', 'sim/Vtop__ALLsup.cpp', 'verilated.cpp', 'verilated_vcd_c.cpp'])]
+        ext_modules=[Extension('top', filelist)]
 )

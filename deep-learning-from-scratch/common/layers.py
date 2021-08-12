@@ -273,10 +273,10 @@ class Convolution:
                         ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
                             pass
-                        elif abs((fl - ou)/ou) < 0.01:
+                        elif abs((fl - ou)/ou) < 0.07 or abs(fl) < 0.003 and abs(ou) < 0.003:
                             pass
                         else:
-                            print("Error: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
+                            print("ErrorF: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
                         out[i+(n-1)*sample][j] = fl
 
             self._fpga.recv(out_data)
@@ -297,10 +297,10 @@ class Convolution:
                 ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
                     pass
-                elif abs((fl - ou)/ou) < 0.01:
+                elif abs((fl - ou)/ou) < 0.07 or abs(fl) < 0.003 and abs(ou) < 0.003:
                     pass
                 else:
-                    print("Error: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
+                    print("ErrorF: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
                 out[i+(loop_num-1)*sample][j] = fl
 
         self.x = x
@@ -364,10 +364,10 @@ class Convolution:
                         dc = dcol[i+(n-1)*sample][j]
                         if (fl - dc) == 0 or dc == 0 and fl == 0:
                             pass
-                        elif abs((fl - dc)/dc) < 0.01:
+                        elif abs((fl - dc)/dc) < 0.05 or abs(dc) < 1e-7 and abs(fl) < 1e-7:
                             pass
                         else:
-                            print("Error: ", n-1,i,j,abs((fl - dc)/dc),fl,dc)
+                            print("ErrorB: ", n-1,i,j,abs((fl - dc)/dc),fl,dc)
                         dcol[i+(n-1)*sample][j] = fl
 
             self._fpga.recv(out_data)
@@ -388,10 +388,10 @@ class Convolution:
                 dc = dcol[i+(loop_num-1)*sample][j]
                 if (fl - dc) == 0 or dc == 0 and fl == 0:
                     pass
-                elif abs((fl - dc)/dc) < 0.01:
+                elif abs((fl - dc)/dc) < 0.05 or abs(dc) < 1e-7 and abs(fl) < 1e-7:
                     pass
                 else:
-                    print("Error: ", loop_num-1,i,j,abs((fl - dc)/dc),fl,dc)
+                    print("ErrorB: ", loop_num-1,i,j,abs((fl - dc)/dc),fl,dc)
                 dcol[i+(loop_num-1)*sample][j] = fl
 
         self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)

@@ -167,7 +167,7 @@ module core
      (
       .clk(clk),
       .init(init2),
-      .exec(exec2|bias2),
+      .exec(exec2),
       .update(update),
       .w(m2[15:0]),
       .d(d2[15:0]),
