@@ -38,6 +38,7 @@ for i in range(10):
     print(hex(input_buffer[i]))
 
 dma_send.sendchannel.transfer(input_buffer)
+dma_send.sendchannel.wait()
 
 print("MEM IP MM Mode")
 
@@ -69,6 +70,7 @@ print("DMA Read 実行")
 output_buffer = allocate(shape=(data_size,), dtype=np.uint32)
 
 dma_recv.recvchannel.transfer(output_buffer)
+dma_recv.recvchannel.wait()
 
 for i in range(10):
     print('0x' + format(output_buffer[i], '02x'))
