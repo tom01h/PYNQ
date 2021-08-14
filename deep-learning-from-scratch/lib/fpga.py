@@ -33,7 +33,7 @@ class _Fpga(object):
 
     def send(self, data):
         top.send_start()
-        self._send_data = data.flatten().tolist()
+        self._send_data = data.tolist()
 
     def send_wait(self):
         while len(self._send_data) > 0:
@@ -44,7 +44,7 @@ class _Fpga(object):
     def recv(self, data):
         top.recv_start()
         self._recv_data = data
-        self._recv_size = len(data.flatten().tolist())
+        self._recv_size = len(data.tolist())
         self._recv_list = {}
 
     def recv_wait(self):
@@ -54,7 +54,7 @@ class _Fpga(object):
             recv_data = top.recv()
             if not recv_data == None:
                 for j in range(self._bus_size):
-                    data_flat[i] = recv_data%(1<<32)
+                    data_flat[i] = int_to_float(recv_data%(1<<32))
                     recv_data >>= 32
                     i += 1
             self._evaluate()
