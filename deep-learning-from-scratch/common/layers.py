@@ -5,8 +5,6 @@ from common.util import im2col, col2im
 
 from lib.fpga import _Fpga
 from lib.lib  import alloc
-from lib.fpga import float_to_hex
-from lib.fpga import int_to_float
 
 class Relu:
     def __init__(self):
@@ -249,16 +247,22 @@ class Convolution:
 
         # set matrix
         self._fpga.write(0, 1)
-        self._fpga.send(col_W)
+        in_data = alloc(shape=col_W.flatten().shape, dtype=np.float32)
+        in_data[:] = col_W.flatten().tolist()
+        in_data.flush()
+        self._fpga.send(in_data)
         self._fpga.send_wait()
         self._fpga.write(0, 0)
 
         # run
-        out_data = alloc(shape=(sample,out_ch), dtype=np.uint32)
+        out_data = alloc(shape=(sample,out_ch), dtype=np.float32)
         self._fpga.write(0, 2)
 
         # 0 input
-        self._fpga.send(col[0:sample])
+        in_data = alloc(shape=col[0:sample].flatten().shape, dtype=np.float32)
+        in_data[:] = col[0:sample].flatten().tolist()
+        in_data.flush()
+        self._fpga.send(in_data)
         self._fpga.send_wait()
 
         loop_num = int(col.shape[0]/sample)
@@ -266,10 +270,11 @@ class Convolution:
             if n != 0:
                 # n-1 output
                 self._fpga.recv_wait()
+                out_data.invalidate()
 
                 for i in range(sample):
                     for j in range(out_ch):
-                        fl = int_to_float(out_data[i][j]) + self.b[j]
+                        fl = out_data[i][j] + self.b[j]
                         ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
                             pass
@@ -283,7 +288,9 @@ class Convolution:
 
             # n+1 input
             if n+1 != loop_num:
-                self._fpga.send(col[(n+1)*sample:(n+2)*sample])
+                in_data[:] = col[(n+1)*sample:(n+2)*sample].flatten().tolist()
+                in_data.flush()
+                self._fpga.send(in_data)
                 self._fpga.send_wait()
             else:
                 self._fpga.write(0, 6)
@@ -293,7 +300,7 @@ class Convolution:
 
         for i in range(sample):
             for j in range(out_ch):
-                fl = int_to_float(out_data[i][j]) + self.b[j]
+                fl = out_data[i][j] + self.b[j]
                 ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
                     pass
@@ -340,16 +347,22 @@ class Convolution:
 
         # set matrix
         self._fpga.write(0, 1)
-        self._fpga.send(self.col_W.T)
+        in_data = alloc(shape=self.col_W.T.shape, dtype=np.float32)
+        in_data[:] = self.col_W.T.tolist()
+        in_data.flush()
+        self._fpga.send(in_data)
         self._fpga.send_wait()
         self._fpga.write(0, 0)
 
         # run
-        out_data = alloc(shape=(sample,out_ch), dtype=np.uint32)
+        out_data = alloc(shape=(sample,out_ch), dtype=np.float32)
         self._fpga.write(0, 2)
 
         # 0 input
-        self._fpga.send(dout[0:sample])
+        in_data = alloc(shape=dout[0:sample].shape, dtype=np.float32)
+        in_data[:] = dout[0:sample].tolist()
+        in_data.flush()
+        self._fpga.send(in_data)
         self._fpga.send_wait()
 
         loop_num = int(dout.shape[0]/sample)
@@ -360,7 +373,7 @@ class Convolution:
 
                 for i in range(sample):
                     for j in range(out_ch):
-                        fl = int_to_float(out_data[i][j])
+                        fl = out_data[i][j]
                         dc = dcol[i+(n-1)*sample][j]
                         if (fl - dc) == 0 or dc == 0 and fl == 0:
                             pass
@@ -374,7 +387,9 @@ class Convolution:
 
             # n+1 input
             if n+1 != loop_num:
-                self._fpga.send(dout[(n+1)*sample:(n+2)*sample])
+                in_data[:] = dout[(n+1)*sample:(n+2)*sample].tolist()
+                in_data.flush()
+                self._fpga.send(in_data)
                 self._fpga.send_wait()
             else:
                 self._fpga.write(0, 6)
@@ -384,7 +399,7 @@ class Convolution:
 
         for i in range(sample):
             for j in range(out_ch):
-                fl = int_to_float(out_data[i][j])
+                fl = out_data[i][j]
                 dc = dcol[i+(loop_num-1)*sample][j]
                 if (fl - dc) == 0 or dc == 0 and fl == 0:
                     pass
