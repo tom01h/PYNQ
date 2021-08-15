@@ -228,8 +228,12 @@ class Convolution:
         col = im2col(x, FH, FW, self.stride, self.pad)
         col_W = self.W.reshape(FN, -1).T
 
-        out = np.dot(col, col_W) + self.b
-        if self.init_f:
+        _, w = col_W.shape
+        h, _ = col.shape
+        out = np.zeros((h, w))
+        #out = np.dot(col, col_W) + self.b
+        #if self.init_f:
+        if 0:
             print("Conv forward Weight", col_W.shape)
             print("Conv forward In Data", col.shape)
             print("Conv forward Out Data", out.shape)
@@ -275,6 +279,7 @@ class Convolution:
                 for i in range(sample):
                     for j in range(out_ch):
                         fl = out_data[i][j] + self.b[j]
+                        '''
                         ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
                             pass
@@ -282,6 +287,7 @@ class Convolution:
                             pass
                         else:
                             print("ErrorF: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
+                        '''
                         out[i+(n-1)*sample][j] = fl
 
             self._fpga.recv(out_data)
@@ -301,6 +307,7 @@ class Convolution:
         for i in range(sample):
             for j in range(out_ch):
                 fl = out_data[i][j] + self.b[j]
+                '''
                 ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
                     pass
@@ -308,6 +315,7 @@ class Convolution:
                     pass
                 else:
                     print("ErrorF: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
+                '''
                 out[i+(loop_num-1)*sample][j] = fl
 
         self.x = x
@@ -323,9 +331,13 @@ class Convolution:
 
         self.db = np.sum(dout, axis=0)
         self.dW = np.dot(self.col.T, dout)
-        dcol = np.dot(dout, self.col_W.T)
+        _, h = self.col_W.T.shape
+        w, _ = dout.shape
+        dcol = np.zeros((w, h))
+        #dcol = np.dot(dout, self.col_W.T)
 
-        if self.init_b:
+        if 0:
+        #if self.init_b:
             print("Conv backward Out Data", dout.shape)
             print("Conv backward In Data", self.col.T.shape)
             print("Conv backward delta W", self.dW.shape)
@@ -374,6 +386,7 @@ class Convolution:
                 for i in range(sample):
                     for j in range(out_ch):
                         fl = out_data[i][j]
+                        '''
                         dc = dcol[i+(n-1)*sample][j]
                         if (fl - dc) == 0 or dc == 0 and fl == 0:
                             pass
@@ -381,6 +394,7 @@ class Convolution:
                             pass
                         else:
                             print("ErrorB: ", n-1,i,j,abs((fl - dc)/dc),fl,dc)
+                        '''
                         dcol[i+(n-1)*sample][j] = fl
 
             self._fpga.recv(out_data)
@@ -400,6 +414,7 @@ class Convolution:
         for i in range(sample):
             for j in range(out_ch):
                 fl = out_data[i][j]
+                '''
                 dc = dcol[i+(loop_num-1)*sample][j]
                 if (fl - dc) == 0 or dc == 0 and fl == 0:
                     pass
@@ -407,6 +422,7 @@ class Convolution:
                     pass
                 else:
                     print("ErrorB: ", loop_num-1,i,j,abs((fl - dc)/dc),fl,dc)
+                '''
                 dcol[i+(loop_num-1)*sample][j] = fl
 
         self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
