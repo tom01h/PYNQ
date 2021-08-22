@@ -22,7 +22,7 @@ x_test, t_test = x_test[:100], t_test[:100]
 
 max_epochs = 1
 
-fpga = _Fpga("./bit/design_1_wrapper.bit")
+fpga = _Fpga("./bit/design_1.bit")
 
 network = SimpleConvNet(input_dim=(1,28,28), 
                         conv_param = {'filter_num': 30, 'filter_size': 5, 'pad': 0, 'stride': 1},

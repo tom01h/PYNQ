@@ -1,17 +1,7 @@
 from pynq import Overlay
 from pynq import MMIO
+from pynq import allocate
 import pynq.lib.dma
-
-import struct
-
-def float_to_int(f):
-    return struct.unpack('>I', struct.pack('>f', f))[0]
-
-def float_to_hex(f):
-    return hex(struct.unpack('>I', struct.pack('>f', f))[0])
-
-def int_to_float(i):
-    return struct.unpack('>f', struct.pack('>I', i))[0]
 
 class _Fpga(object):
     def __init__(self, bit_file = "./bit/design_1_wrapper.bit"):
@@ -24,20 +14,27 @@ class _Fpga(object):
         self._dma_send = self._overlay.axi_dma_0
         self._dma_recv = self._overlay.axi_dma_1
 
+    def alloc(self, shape, dtype):
+        self._send_buf = allocate(shape, dtype)
+    
     def write(self, address, value):
         self._gemm.write(address, value)
 
     def send(self, data):
-        self._dma_send.sendchannel.transfer(data)
+        self._send_buf[:] = data.tolist()
+        self._send_buf.flush()
+        self._dma_send.sendchannel.transfer(self._send_buf)
 
     def send_wait(self):
         self._dma_send.sendchannel.wait()
 
     def recv(self, data):
+        self._recv_buf = data
         self._dma_recv.recvchannel.transfer(data)
 
     def recv_wait(self):
         self._dma_recv.recvchannel.wait()
+        self._recv_buf.invalidate()
 
     def fin(self):
         pass

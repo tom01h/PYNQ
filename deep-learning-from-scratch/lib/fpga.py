@@ -6,9 +6,6 @@ import struct
 def float_to_int(f):
     return struct.unpack('>I', struct.pack('>f', f))[0]
 
-def float_to_hex(f):
-    return hex(struct.unpack('>I', struct.pack('>f', f))[0])
-
 def int_to_float(i):
     return struct.unpack('>f', struct.pack('>I', i))[0]
 
@@ -28,6 +25,9 @@ class _Fpga(object):
         self._recv_list = {}
         top.evaluate()
 
+    def alloc(self, shape, dtype):
+        pass
+        
     def write(self, address, value):
         top.write(address, value)
 
@@ -54,7 +54,7 @@ class _Fpga(object):
             recv_data = top.recv()
             if not recv_data == None:
                 for j in range(self._bus_size):
-                    data_flat[i] = recv_data%(1<<32)
+                    data_flat[i] = int_to_float(recv_data%(1<<32))
                     recv_data >>= 32
                     i += 1
             self._evaluate()

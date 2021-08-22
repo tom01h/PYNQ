@@ -213,10 +213,6 @@ class Convolution:
         self.dW = None
         self.db = None
 
-        self.init_f = True
-        self.init_b = True
-        self.init_p = True
-
         self._fpga = fpga
 
     def forward(self, x):
@@ -231,14 +227,7 @@ class Convolution:
         _, w = col_W.shape
         h, _ = col.shape
         out = np.zeros((h, w))
-        #out = np.dot(col, col_W) + self.b
-        #if self.init_f:
-        if 0:
-            print("Conv forward Weight", col_W.shape)
-            print("Conv forward In Data", col.shape)
-            print("Conv forward Out Data", out.shape)
-            print("")
-            self.init_f = False
+        out = np.dot(col, col_W) + self.b # 期待値を計算
 
         sample = 30
         kernel = C*FH*FW
@@ -251,10 +240,8 @@ class Convolution:
 
         # set matrix
         self._fpga.write(0, 1)
-        in_data = alloc(shape=col_W.flatten().shape, dtype=np.float32)
-        in_data[:] = col_W.flatten().tolist()
-        in_data.flush()
-        self._fpga.send(in_data)
+        self._fpga.alloc(shape=col_W.shape, dtype=np.float32)
+        self._fpga.send(col_W)
         self._fpga.send_wait()
         self._fpga.write(0, 0)
 
@@ -263,10 +250,8 @@ class Convolution:
         self._fpga.write(0, 2)
 
         # 0 input
-        in_data = alloc(shape=col[0:sample].flatten().shape, dtype=np.float32)
-        in_data[:] = col[0:sample].flatten().tolist()
-        in_data.flush()
-        self._fpga.send(in_data)
+        self._fpga.alloc(shape=col[0:sample].shape, dtype=np.float32)
+        self._fpga.send(col[0:sample])
         self._fpga.send_wait()
 
         loop_num = int(col.shape[0]/sample)
@@ -274,12 +259,11 @@ class Convolution:
             if n != 0:
                 # n-1 output
                 self._fpga.recv_wait()
-                out_data.invalidate()
 
                 for i in range(sample):
                     for j in range(out_ch):
                         fl = out_data[i][j] + self.b[j]
-                        '''
+                        #''' 期待値比較
                         ou = out[i+(n-1)*sample][j]
                         if (fl - ou) == 0 or ou == 0 and fl == 0:
                             pass
@@ -287,16 +271,14 @@ class Convolution:
                             pass
                         else:
                             print("ErrorF: ", n-1,i,j,abs((fl - ou)/ou),fl,ou)
-                        '''
-                        out[i+(n-1)*sample][j] = fl
+                        #'''
+                        out[i+(n-1)*sample][j] = fl # 期待値領域に上書き
 
             self._fpga.recv(out_data)
 
             # n+1 input
             if n+1 != loop_num:
-                in_data[:] = col[(n+1)*sample:(n+2)*sample].flatten().tolist()
-                in_data.flush()
-                self._fpga.send(in_data)
+                self._fpga.send(col[(n+1)*sample:(n+2)*sample])
                 self._fpga.send_wait()
             else:
                 self._fpga.write(0, 6)
@@ -307,7 +289,7 @@ class Convolution:
         for i in range(sample):
             for j in range(out_ch):
                 fl = out_data[i][j] + self.b[j]
-                '''
+                #''' 期待値比較
                 ou = out[i+(loop_num-1)*sample][j]
                 if (fl - ou) == 0 or ou == 0 and fl == 0:
                     pass
@@ -315,8 +297,8 @@ class Convolution:
                     pass
                 else:
                     print("ErrorF: ", loop_num-1,i,j,abs((fl - ou)/ou),fl,ou)
-                '''
-                out[i+(loop_num-1)*sample][j] = fl
+                #'''
+                out[i+(loop_num-1)*sample][j] = fl # 期待値領域に上書き
 
         self.x = x
         self.col = col
@@ -334,19 +316,7 @@ class Convolution:
         _, h = self.col_W.T.shape
         w, _ = dout.shape
         dcol = np.zeros((w, h))
-        #dcol = np.dot(dout, self.col_W.T)
-
-        if 0:
-        #if self.init_b:
-            print("Conv backward Out Data", dout.shape)
-            print("Conv backward In Data", self.col.T.shape)
-            print("Conv backward delta W", self.dW.shape)
-            print("")
-            print("Conv backward Weight", self.col_W.T.shape)
-            print("Conv backward Out Data", dout.shape)
-            print("Conv backward delta In", dcol.shape)
-            print("")
-            self.init_b = False
+        dcol = np.dot(dout, self.col_W.T) # 期待値を計算
 
         sample = 30
         kernel = FN
@@ -359,10 +329,8 @@ class Convolution:
 
         # set matrix
         self._fpga.write(0, 1)
-        in_data = alloc(shape=self.col_W.T.shape, dtype=np.float32)
-        in_data[:] = self.col_W.T.tolist()
-        in_data.flush()
-        self._fpga.send(in_data)
+        self._fpga.alloc(shape=self.col_W.T.shape, dtype=np.float32)
+        self._fpga.send(self.col_W.T)
         self._fpga.send_wait()
         self._fpga.write(0, 0)
 
@@ -371,10 +339,8 @@ class Convolution:
         self._fpga.write(0, 2)
 
         # 0 input
-        in_data = alloc(shape=dout[0:sample].shape, dtype=np.float32)
-        in_data[:] = dout[0:sample].tolist()
-        in_data.flush()
-        self._fpga.send(in_data)
+        self._fpga.alloc(shape=dout[0:sample].shape, dtype=np.float32)
+        self._fpga.send(dout[0:sample])
         self._fpga.send_wait()
 
         loop_num = int(dout.shape[0]/sample)
@@ -386,7 +352,7 @@ class Convolution:
                 for i in range(sample):
                     for j in range(out_ch):
                         fl = out_data[i][j]
-                        '''
+                        #''' 期待値比較
                         dc = dcol[i+(n-1)*sample][j]
                         if (fl - dc) == 0 or dc == 0 and fl == 0:
                             pass
@@ -394,16 +360,14 @@ class Convolution:
                             pass
                         else:
                             print("ErrorB: ", n-1,i,j,abs((fl - dc)/dc),fl,dc)
-                        '''
-                        dcol[i+(n-1)*sample][j] = fl
+                        #'''
+                        dcol[i+(n-1)*sample][j] = fl # 期待値領域に上書き
 
             self._fpga.recv(out_data)
 
             # n+1 input
             if n+1 != loop_num:
-                in_data[:] = dout[(n+1)*sample:(n+2)*sample].tolist()
-                in_data.flush()
-                self._fpga.send(in_data)
+                self._fpga.send(dout[(n+1)*sample:(n+2)*sample])
                 self._fpga.send_wait()
             else:
                 self._fpga.write(0, 6)
@@ -414,7 +378,7 @@ class Convolution:
         for i in range(sample):
             for j in range(out_ch):
                 fl = out_data[i][j]
-                '''
+                #''' 期待値比較
                 dc = dcol[i+(loop_num-1)*sample][j]
                 if (fl - dc) == 0 or dc == 0 and fl == 0:
                     pass
@@ -422,8 +386,8 @@ class Convolution:
                     pass
                 else:
                     print("ErrorB: ", loop_num-1,i,j,abs((fl - dc)/dc),fl,dc)
-                '''
-                dcol[i+(loop_num-1)*sample][j] = fl
+                #'''
+                dcol[i+(loop_num-1)*sample][j] = fl # 期待値領域に上書き
 
         self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
         dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)

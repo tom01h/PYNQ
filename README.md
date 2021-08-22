@@ -213,4 +213,3 @@ IP の行列乗算機能は前回と同じです。
 
 ここでの使い方は、`deep-learning-from-scratch/ch07/README.md` を参照ください。
 
-<!--[Ultra96 でやってみた人](https://www8281uo.sakura.ne.jp/blog/?p=739)-->

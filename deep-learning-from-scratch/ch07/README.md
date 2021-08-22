@@ -14,6 +14,7 @@ $ pip3 install matplotlib
 
 ```
 $ make
+$ mv lib lib_fpga # ../libを優先して読んでもらいたかったんだけど…
 $ PYTHONPATH=../ python3 train_convnet.py
 ```
 
@@ -24,6 +25,39 @@ $ PYTHONPATH=../ python3 train_convnet.py
 シミュレーションには結構な時間がかかるので、real 型を使ってシミュレーションをするために、`hoge_bf16.sv` を別のファイルとして準備しました。real で実行する場合は _bf16 のないファイルを使ってください。
 
 現状、すべての計算の期待値を求めて、誤差の比較をしていますが、そこそこ大きな誤差が出ている模様…
+
+## FPGA で実行する
+
+すごく遅いけど…
+
+### ブロックデザインを作る
+
+[NahiViva](https://github.com/tokuden/NahiViva) で再現できるようにしました。説明は [こっち](http://nahitafu.cocolog-nifty.com/nahitafu/2019/05/post-2cfa5c.html) を見た方が良いかも。  
+必要なファイルをダウンロードして、`open_project_gui.cmd` 実行でプロジェクトが再現されます。
+
+### ファイルを転送する
+
+deep-learning-from-scratch/ 以下を PYNQ を実行している FPGA ボードにコピーする
+
+ch07/bit/ ディレクトリを準備して次のファイルをコピーする
+
+`project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+
+- design_1.hwh を design_1.hwh にリネームしてコピー
+
+- design_1_bd.tcl を design_1.tcl にリネームしてコピー
+
+`project_1\project_1.runs\impl_1` から
+
+- design_1_wrapper.bit を design_1.bit にリネームしてコピー
+
+### 実行する
+
+deep-learning-from-scratch/ch07 で 
+
+```
+$ sudo python3 train_convnet.py
+```
 
 #### 参考
 
