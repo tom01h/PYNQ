@@ -14,8 +14,7 @@ $ pip3 install matplotlib
 
 ```
 $ make
-$ mv lib lib_fpga # ../libを優先して読んでもらいたかったんだけど…
-$ PYTHONPATH=../ python3 train_convnet.py
+$ PYTHONPATH=../lib/ python3 train_convnet.py
 ```
 
 ウェイトとデータを bfloat16 で入力して、独自のデータ型を中間データとして行列乗算を実行し、float32 の形式で結果を出力します。
@@ -56,7 +55,7 @@ ch07/bit/ ディレクトリを準備して次のファイルをコピーする
 deep-learning-from-scratch/ch07 で 
 
 ```
-$ sudo python3 train_convnet.py
+$ sudo PYTHONPATH=./lib/ python3 train_convnet.py
 ```
 
 #### 参考

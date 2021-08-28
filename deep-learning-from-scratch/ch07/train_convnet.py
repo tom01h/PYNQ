@@ -9,7 +9,7 @@ from dataset.mnist import load_mnist
 from simple_convnet import SimpleConvNet
 from common.trainer import Trainer
 
-from lib.fpga import _Fpga
+from fpga import _Fpga
 
 # データの読み込み
 (x_train, t_train), (x_test, t_test) = load_mnist(flatten=False)
