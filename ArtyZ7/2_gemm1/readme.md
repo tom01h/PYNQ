@@ -102,7 +102,9 @@ FPGA の Linux に 2_gemm1/bit ディレクトリを作成し、以下のファ�
 xilinx@pynq:~/2_gemm1$ sudo PYTHONPATH=~ python3 test.py
 ```
 
-### TODO
+### ~~TODO~~
+
+以下の問題は、AXI Stream の TLAST をアサートすることで解決しました (a21ab76)
 
 PL to PS の DMA が 1回の転送が終わると、Running が False になってアクセス不能になる。
 
