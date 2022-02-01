@@ -17,8 +17,8 @@ dma_recv = overlay.axi_dma_1
 
 data_size = 256
 
-mem_address = overlay.ip_dict['mem_0/S_AXI']['phys_addr']
-mem_range = overlay.ip_dict['mem_0/S_AXI']['addr_range']
+mem_address = overlay.ip_dict['mem_0']['phys_addr']
+mem_range = overlay.ip_dict['mem_0']['addr_range']
 
 mm_mem = MMIO(mem_address, mem_range)
 

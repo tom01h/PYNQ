@@ -40,7 +40,7 @@ deep-learning-from-scratch/ 以下を PYNQ を実行している FPGA ボード�
 
 ch07/bit/ ディレクトリを準備して次のファイルをコピーする
 
-`project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+`project_1\project_1.gen\sources_1\bd\design_1\hw_handoff` から
 
 - design_1.hwh を design_1.hwh にリネームしてコピー
 
@@ -55,7 +55,7 @@ ch07/bit/ ディレクトリを準備して次のファイルをコピーする
 deep-learning-from-scratch/ch07 で 
 
 ```
-$ sudo PYTHONPATH=./lib/ python3 train_convnet.py
+$ sudo -E PYTHONPATH=./lib/ python3 train_convnet.py
 ```
 
 #### 参考
@@ -64,4 +64,4 @@ $ sudo PYTHONPATH=./lib/ python3 train_convnet.py
 
 [python - CでPy_Noneを返す前にPy_INCREF(Py_None)が必要なのはなぜですか？](https://ja.coder.work/so/python/200081)
 
-Verilog で wire と real を変換  $realtobits $realtobits
+Verilog で wire と real を変換  `$realtobits` `$realtobits`

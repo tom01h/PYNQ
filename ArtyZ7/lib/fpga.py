@@ -6,8 +6,8 @@ class _Fpga(object):
     def __init__(self, bit_file = "./bit/gemm1.bit"):
         self._overlay = Overlay(bit_file)
 
-        gemm_address = self._overlay.ip_dict['top_0/S_AXI']['phys_addr']
-        gemm_range = self._overlay.ip_dict['top_0/S_AXI']['addr_range']
+        gemm_address = self._overlay.ip_dict['top_0']['phys_addr']
+        gemm_range = self._overlay.ip_dict['top_0']['addr_range']
         self._gemm = MMIO(gemm_address, gemm_range)
 
         self._dma_send = self._overlay.axi_dma_0

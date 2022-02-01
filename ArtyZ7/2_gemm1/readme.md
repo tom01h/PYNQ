@@ -19,7 +19,7 @@ IP の行列乗算機能は疑似コードを書くとこんな感じ。
     for(int j=0; j<4; j++){
       int sum[4] = {};
       for(int k=0; k<8; k++){
-      	int d = in_buf[j][k];
+          int d = in_buf[j][k];
 # parallel for
         for(int i=0; i<4; i++){
           sum[i] += matrix[i][k] * d;
@@ -84,13 +84,13 @@ FPGA の Linux に 2_gemm1 ディレクトリを作成し、以下のファイ�
 
 FPGA の Linux に 2_gemm1/bit ディレクトリを作成し、以下のファイルをリネームしてコピーする
 
-`PYNQ\ArtyZ7\2_gemm1\project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+`project_1\project_1.gen\sources_1\bd\design_1\hw_handoff` から
 
 - design_1.hwh を gemm1.hwh にリネームしてコピー
 
 - design_1_bd.tcl を gemm1.tcl にリネームしてコピー
 
-`PYNQ\ArtyZ7\2_gemm1\project_1\project_1.runs\impl_1` から
+`project_1\project_1.runs\impl_1` から
 
 - design_1_wrapper.bit を gemm1.bit にリネームしてコピー
 
@@ -99,7 +99,7 @@ FPGA の Linux に 2_gemm1/bit ディレクトリを作成し、以下のファ�
 先ほど作成した 2_gemm1 ディレクトリにて、
 
 ```
-xilinx@pynq:~/2_gemm1$ sudo PYTHONPATH=~ python3 test.py
+xilinx@pynq:~/2_gemm1$ sudo -E PYTHONPATH=.. python3 test.py
 ```
 
 ### ~~TODO~~
@@ -117,4 +117,5 @@ PL to PS の DMA が 1回の転送が終わると、Running が False になっ�
     dma1.write(0x30,4)
     dma_recv.recvchannel.start()
 ```
+
 

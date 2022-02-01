@@ -31,13 +31,13 @@ FPGA の Linux に 1_dma ディレクトリを作成し、以下のファイル�
 
 FPGA の Linux に 1_dma/bit ディレクトリを作成し、以下のファイルをリネームしてコピーする
 
-`PYNQ\ArtyZ7\1_dma\project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+`project_1\project_1.gen\sources_1\bd\design_1\hw_handoff` から
 
 - design_1.hwh を dma.hwh にリネームしてコピー
 
 - design_1_bd.tcl を dma.tcl にリネームしてコピー
 
-`PYNQ\ArtyZ7\1_dma\project_1\project_1.runs\impl_1` から
+`project_1\project_1.runs\impl_1` から
 
 - design_1_wrapper.bit を dma.bit にリネームしてコピー
 
@@ -46,6 +46,5 @@ FPGA の Linux に 1_dma/bit ディレクトリを作成し、以下のファイ
 先ほど作成した 1_dma ディレクトリにて、
 
 ```
-xilinx@pynq:~/1_dma$ sudo python3 test.py
+xilinx@pynq:~/1_dma$ sudo -E python3 test.py
 ```
-

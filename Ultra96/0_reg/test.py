@@ -10,8 +10,8 @@ overlay = Overlay("./bit/regs.bit")
 
 print("IP 初期設定")
 
-mem_address = overlay.ip_dict['regs_0/S_AXI']['phys_addr']
-mem_range = overlay.ip_dict['regs_0/S_AXI']['addr_range']
+mem_address = overlay.ip_dict['regs_0']['phys_addr']
+mem_range = overlay.ip_dict['regs_0']['addr_range']
 
 mm_mem = MMIO(mem_address, mem_range)
 

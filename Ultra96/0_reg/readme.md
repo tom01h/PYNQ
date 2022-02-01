@@ -15,22 +15,22 @@ FPGA の Linux に以下のファイルをコピーする
 
 FPGA の Linux に ~/bit ディレクトリを作成し、以下のファイルをリネームしてコピーする
 
-`PYNQ/Ultra96/0_reg/sensors96b/sensors96b.srcs/sources_1/bd/sensors96b/hw_handoff/` から
+`project_1\project_1.gen\sources_1\bd\design_1\hw_handoff` から
 
-- sensors96b.hwh を regs.hwh にリネームしてコピー
+- design_1.hwh を regs.hwh にリネームしてコピー
 
-- sensors96b_bd.tcl を regs.tcl にリネームしてコピー
+- design_1_bd.tcl を regs.tcl にリネームしてコピー
 
-`PYNQ/Ultra96/0_reg/sensors96b/sensors96b.runs/impl_1/` から
+`project_1\project_1.runs\impl_1` から
 
-- sensors96b_wrapper.bit を regs.bit にリネームしてコピー
+- design_1_wrapper.bit を regs.bit にリネームしてコピー
 
 ### 実行する
 
 0_reg ディレクトリにて、
 
 ```
-xilinx@pynq:~$ sudo python3 test.py
+xilinx@pynq:~$ sudo -E python3 test.py
 bit ファイル読み込み
 IP 初期設定
 レジスタアクセス
@@ -40,4 +40,5 @@ wstrb 0xf0
 lower 0xced55cc0
 upper 0x8d9d1a2d
 ```
+
 

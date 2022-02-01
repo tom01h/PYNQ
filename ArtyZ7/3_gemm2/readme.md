@@ -14,7 +14,7 @@ IP の行列乗算機能は前回と同じです。
     for(int j=0; j<4; j++){
       int sum[4] = {};
       for(int k=0; k<8; k++){
-      	int d = in_buf[j][k];
+          int d = in_buf[j][k];
 # parallel for
         for(int i=0; i<4; i++){
           sum[i] += matrix[i][k] * d;
@@ -82,13 +82,13 @@ FPGA の Linux に 3_gemm2 ディレクトリを作成し、以下のファイ�
 
 FPGA の Linux に 3_gemm2/bit ディレクトリを作成し、以下のファイルをリネームしてコピーする
 
-`PYNQ\ArtyZ7\3_gemm2\project_1\project_1.srcs\sources_1\bd\design_1\hw_handoff` から
+`project_1\project_1.gen\sources_1\bd\design_1\hw_handoff` から
 
 - design_1.hwh を gemm2.hwh にリネームしてコピー
 
 - design_1_bd.tcl を gemm2.tcl にリネームしてコピー
 
-`PYNQ\ArtyZ7\3_gemm2\project_1\project_1.runs\impl_1` から
+`project_1\project_1.runs\impl_1` から
 
 - design_1_wrapper.bit を gemm2.bit にリネームしてコピー
 
@@ -97,6 +97,5 @@ FPGA の Linux に 3_gemm2/bit ディレクトリを作成し、以下のファ�
 先ほど作成した 3_gemm2ディレクトリにて、
 
 ```
-xilinx@pynq:~/3_gemm2$ sudo PYTHONPATH=~ python3 test.py
+xilinx@pynq:~/3_gemm2$ sudo -E PYTHONPATH=.. python3 test.py
 ```
-

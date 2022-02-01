@@ -18,20 +18,19 @@ Arty Z7 20 と PYNQ Z1 は電源スイッチの有無以外に差はないらし
 
 ### ダウンロードと SD カードへの書き込み
 
-[公式ダウンロードページ](http://www.pynq.io/board.html) から `PYNQ-Z1 v2.6 PYNQ image` をダウンロード。
+[公式ダウンロードページ](http://www.pynq.io/board.html) から `PYNQ-Z1 v2.7 PYNQ image` をダウンロード。
 
-ZIP ファイルから `pynq_z1_v2.6.img` を取り出す。
+ZIP ファイルから `pynq_z1_v2.7.0.img` を取り出す。
 
 ここから先は RaspberryPi で実行しましたが、dd が使えれば何でもよいはず。
 
-ダウンロードパス と、MicroSD のマウントポイント `/dev/sdbN` は適宜書き換え。
+ダウンロードパス と、MicroSD のマウントポイント `/dev/sdX` は適宜書き換え。
 
 ```
-$ sudo sudo umount /dev/sdbN
-$ sudo dd bs=16M if=/${ダウンロードパス}/pynq_z1_v2.5.img of=/dev/sdb
+$ sudo dd bs=16M if=/${ダウンロードパス}/pynq_z1_v2.7.0img of=/dev/sdX
 ```
 
-### 起動
+### 起動 (PYNQ v2.5で試しました)
 
 [公式ページの説明](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html#board-setup) を参考にして起動。ちなみに Arty Z7 には電源スイッチがないので、1,2,3,5,4 の順で実行します。
 
@@ -165,13 +164,13 @@ MicroBlaze のプログラムを送り込んで実行することもできるみ
 
 `PYNQ_Workshop/Session_4/5_xlnk_with_pl_master_example.ipynb`
 
-## PL デザインを自作する
+## PL デザインを自作する (PYNQ v2.7 で試しました）
 
 [Petalinux と DMA を使うサンプル実装](https://github.com/tom01h/TIL/tree/master/petalinux_dma) の時と同じことを試していきます。
 
 ただし、AXI DMA はリードとライトで別々にインスタンスしたほうが面倒に巻き込まれないで済みそうです。
 
-あと、PYNQ v2.5 を使用するには、Vivado 2019.1 を使うのが良いと思います。
+あと、PYNQ v2.7 には Vivado 2020.2.2 を使っています。
 
 以降、Jupyter Notebook は使いません。
 
@@ -205,11 +204,10 @@ IP の行列乗算機能は前回と同じです。
 
 詳細は、`PYNQ/ArtyZ7/3_gemm2` を参照ください。
 
-## ゼロから作る Deep Lerning 7章
+## ゼロから作る Deep Lerning 7章 (PYNQ v2.7 で試しました）
 
 書籍『[ゼロから作る Deep Learning](http://www.oreilly.co.jp/books/9784873117584/)』のソースコードを、[ここ](https://github.com/oreilly-japan/deep-learning-from-scratch) からコピーして使用します。
 
 `deep-learning-from-scratch/{README.md, LICENSE.md}` を確認の上で使用してください。
 
 ここでの使い方は、`deep-learning-from-scratch/ch07/README.md` を参照ください。
-
